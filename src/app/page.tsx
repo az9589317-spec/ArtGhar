@@ -5,12 +5,12 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/product-card';
 import { getProducts } from '@/lib/data';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Card, CardContent } from "@/components/ui/card"
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
 } from "@/components/ui/carousel"
 import Autoplay from "embla-carousel-autoplay"
 import React from 'react';
@@ -18,50 +18,53 @@ import React from 'react';
 export default function Home() {
   const products = getProducts();
   const plugin = React.useRef(
-    Autoplay({ delay: 2000, stopOnInteraction: true })
+    Autoplay({ delay: 4000, stopOnInteraction: true })
   )
 
   return (
     <div className="flex flex-col">
-       <section className="w-full py-12 md:py-20">
-        <div className="container mx-auto px-4">
-          <Carousel
-            plugins={[plugin.current]}
-            className="w-full"
-            onMouseEnter={plugin.current.stop}
-            onMouseLeave={plugin.current.reset}
-          >
-            <CarouselContent>
-              {products.slice(0, 5).map((product) => (
-                <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/3">
-                  <div className="p-1">
-                    <Card>
-                      <CardContent className="flex aspect-square items-center justify-center p-0 relative">
-                        <Image
-                          src={product.images[0].url}
-                          alt={product.images[0].alt}
-                          fill
-                          className="object-cover rounded-lg"
-                          data-ai-hint={product.images[0].hint}
-                        />
-                         <div className="absolute inset-0 bg-black/30 rounded-lg" />
-                         <div className="relative z-10 text-white text-center p-4">
-                            <h3 className="text-2xl font-headline font-bold drop-shadow-md">{product.name}</h3>
-                            <Button asChild className="mt-4" variant="secondary">
-                              <Link href={`/products/${product.slug}`}>View Product</Link>
-                            </Button>
-                         </div>
-                      </CardContent>
-                    </Card>
+      <section className="w-full">
+        <Carousel
+          plugins={[plugin.current]}
+          className="w-full"
+          onMouseEnter={plugin.current.stop}
+          onMouseLeave={plugin.current.reset}
+          opts={{ loop: true }}
+        >
+          <CarouselContent>
+            {products.slice(0, 3).map((product) => (
+              <CarouselItem key={product.id}>
+                <div className="relative w-full h-[60vh] md:h-[70vh]">
+                  <Image
+                    src={product.images[0].url}
+                    alt={product.images[0].alt}
+                    fill
+                    className="object-cover"
+                    data-ai-hint={product.images[0].hint}
+                    priority={products.indexOf(product) === 0}
+                  />
+                  <div className="absolute inset-0 bg-black/40" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-4">
+                    <h2 className="text-4xl md:text-6xl font-headline font-bold drop-shadow-lg">
+                      {product.name}
+                    </h2>
+                    <p className="mt-4 max-w-2xl text-lg md:text-xl drop-shadow-md">
+                      {product.description}
+                    </p>
+                    <Button asChild className="mt-8" size="lg">
+                      <Link href={`/products/${product.slug}`}>Discover Now</Link>
+                    </Button>
                   </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-        </div>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-10 hidden md:flex" />
+          <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-10 hidden md:flex" />
+        </Carousel>
       </section>
 
-      <section id="featured-products" className="pb-12 md:pb-20">
+      <section id="featured-products" className="py-12 md:py-20">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-headline font-bold text-center mb-10">
             Featured Products
