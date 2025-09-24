@@ -4,6 +4,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { CartProvider } from '@/hooks/use-cart';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
+import { AuthProvider } from '@/hooks/use-auth';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
   title: 'Artisanal Abode',
@@ -23,11 +25,15 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Belleza&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased flex flex-col min-h-screen">
-        <CartProvider>
-          <Header />
-          <main className="flex-grow">{children}</main>
-          <Footer />
-        </CartProvider>
+        <FirebaseClientProvider>
+          <AuthProvider>
+            <CartProvider>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+            </CartProvider>
+          </AuthProvider>
+        </FirebaseClientProvider>
         <Toaster />
       </body>
     </html>

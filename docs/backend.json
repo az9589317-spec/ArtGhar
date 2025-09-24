@@ -148,19 +148,26 @@
           "type": "string",
           "description": "Email address of the user.",
           "format": "email"
+        },
+        "role": {
+          "type": "string",
+          "description": "The role of the user, e.g., 'user' or 'admin'.",
+          "enum": ["user", "admin"]
         }
       },
       "required": [
         "id",
         "username",
-        "email"
+        "email",
+        "role"
       ]
     }
   },
   "auth": {
     "providers": [
       "password",
-      "anonymous"
+      "anonymous",
+      "google.com"
     ]
   },
   "firestore": {
