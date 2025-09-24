@@ -48,7 +48,7 @@ export default function CartSheet({ open, onOpenChange }: CartSheetProps) {
           <SheetFooter className="bg-background border-t px-6 py-4 sm:flex-col sm:items-stretch sm:space-x-0">
             <div className="flex justify-between text-base font-medium text-foreground">
               <p>Subtotal</p>
-              <p>${totalPrice.toFixed(2)}</p>
+              <p>₹{totalPrice.toFixed(2)}</p>
             </div>
             <p className="mt-0.5 text-sm text-muted-foreground">
               Shipping and taxes calculated at checkout.
@@ -77,7 +77,7 @@ function CartSheetItem({ item, onRemove, onUpdateQuantity }: { item: CartItem; o
             <h3>
               <Link href={`/products/${item.slug}`}>{item.name}</Link>
             </h3>
-            <p className="ml-4">${item.price.toFixed(2)}</p>
+            <p className="ml-4">₹{item.price.toFixed(2)}</p>
           </div>
         </div>
         <div className="flex flex-1 items-end justify-between text-sm">

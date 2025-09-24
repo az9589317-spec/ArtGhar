@@ -48,7 +48,7 @@ export default function ProductPage({ params }: ProductPageProps) {
               by <Link href={`/artists/${artist.id}`} className="text-primary hover:underline">{artist.name}</Link>
             </p>
           )}
-          <p className="text-3xl font-bold text-foreground mt-4">${product.price.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-foreground mt-4">₹{product.price.toFixed(2)}</p>
           <div className="mt-6 prose max-w-none text-foreground/80">
             <p>{product.description}</p>
           </div>

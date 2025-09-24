@@ -60,7 +60,7 @@ export default function CartPage() {
             <CardContent className="space-y-4">
               <div className="flex justify-between">
                 <span>Subtotal ({totalItems} items)</span>
-                <span>${totalPrice.toFixed(2)}</span>
+                <span>₹{totalPrice.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
@@ -70,7 +70,7 @@ export default function CartPage() {
             <CardFooter className="flex-col items-stretch gap-4">
                 <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>${totalPrice.toFixed(2)}</span>
+                    <span>₹{totalPrice.toFixed(2)}</span>
                 </div>
               <Button asChild size="lg" className="w-full">
                 <Link href="/checkout">Proceed to Checkout</Link>
@@ -103,7 +103,7 @@ function CartTableRow({ item, onRemove, onUpdateQuantity }: { item: CartItem; on
           min="1"
         />
       </TableCell>
-      <TableCell className="text-right">${(item.price * item.quantity).toFixed(2)}</TableCell>
+      <TableCell className="text-right">₹{(item.price * item.quantity).toFixed(2)}</TableCell>
       <TableCell>
         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onRemove(item.id)}>
           <Trash2 className="h-4 w-4" />
