@@ -1,3 +1,4 @@
+
 export type Product = {
   id: string;
   name: string;
@@ -24,6 +25,7 @@ export type Artist = {
     alt: string;
     hint: string;
   };
+  avatarUrl?: string;
 };
 
 export type Category = {

@@ -33,15 +33,20 @@ export default function DataPage() {
       // Seed products
       const products = getProducts()
       products.forEach((product) => {
+        const { images, ...productData } = product; // Exclude local-only fields if necessary
         const productRef = doc(firestore, "products", product.id)
-        batch.set(productRef, product)
+        batch.set(productRef, productData)
       })
 
       // Seed artists
       const artists = getArtists()
       artists.forEach((artist) => {
+        const { avatar, ...artistData } = artist;
         const artistRef = doc(firestore, "artists", artist.id)
-        batch.set(artistRef, artist)
+        batch.set(artistRef, {
+            ...artistData,
+            avatarUrl: avatar.url, // Store URL directly
+        })
       })
         
       // Seed categories
