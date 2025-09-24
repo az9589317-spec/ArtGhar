@@ -13,6 +13,7 @@ export type Product = {
   }[];
   artistId: string;
   category: string;
+  imageUrl: string;
 };
 
 export type Artist = {

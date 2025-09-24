@@ -15,7 +15,7 @@ export function AddToCartButton({ product }: { product: Product }) {
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.images[0].url,
+      image: product.imageUrl,
       slug: product.slug,
     });
     toast({

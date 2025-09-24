@@ -3,19 +3,29 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingBag } from 'lucide-react';
-import type { Product } from '@/lib/types';
+import type { Artist, Product } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { getArtistById } from '@/lib/data';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import React from 'react';
+import { doc } from 'firebase/firestore';
+
 
 interface ProductCardProps {
   product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const artist = getArtistById(product.artistId);
+    const firestore = useFirestore();
+
+    const artistRef = useMemoFirebase(() => {
+        if (!firestore || !product.artistId) return null;
+        return doc(firestore, 'artists', product.artistId);
+    }, [firestore, product.artistId]);
+
+  const { data: artist } = useDoc<Artist>(artistRef);
   const { addItem } = useCart();
   const { toast } = useToast();
 
@@ -24,7 +34,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.images[0].url,
+      image: product.imageUrl,
       slug: product.slug,
     });
     toast({
@@ -34,16 +44,15 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
   
   return (
-    <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+    <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group">
       <CardHeader className="p-0 border-b">
         <Link href={`/products/${product.slug}`} className="block">
           <div className="aspect-square relative overflow-hidden">
             <Image
-              src={product.images[0].url}
-              alt={product.images[0].alt}
+              src={product.imageUrl}
+              alt={product.name}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
-              data-ai-hint={product.images[0].hint}
             />
           </div>
         </Link>

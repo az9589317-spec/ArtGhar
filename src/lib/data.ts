@@ -1,6 +1,10 @@
 import type { Product, Artist, Category } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 
+// NOTE: This data is used for seeding the database on the /admin/data page.
+// It is not the source of truth for what users see on the live site.
+// The live site fetches data directly from Firestore.
+
 const artists: Artist[] = [
   { 
     id: '1', 
@@ -41,6 +45,7 @@ const products: Product[] = [
     images: [{ id: 'product-1', url: PlaceHolderImages.find(p => p.id === 'product-1')?.imageUrl!, alt: 'A set of handcrafted ceramic mugs.', hint: 'ceramic mugs' }],
     artistId: '1',
     category: 'Pottery',
+    imageUrl: PlaceHolderImages.find(p => p.id === 'product-1')?.imageUrl!,
   },
   {
     id: '2',
@@ -51,6 +56,7 @@ const products: Product[] = [
     images: [{ id: 'product-2', url: PlaceHolderImages.find(p => p.id === 'product-2')?.imageUrl!, alt: 'An abstract oil painting with vibrant colors.', hint: 'abstract painting' }],
     artistId: '2',
     category: 'Painting',
+    imageUrl: PlaceHolderImages.find(p => p.id === 'product-2')?.imageUrl!,
   },
   {
     id: '3',
@@ -61,6 +67,7 @@ const products: Product[] = [
     images: [{ id: 'product-3', url: PlaceHolderImages.find(p => p.id === 'product-3')?.imageUrl!, alt: 'A delicate silver necklace with a leaf pendant.', hint: 'silver necklace' }],
     artistId: '3',
     category: 'Jewelry',
+    imageUrl: PlaceHolderImages.find(p => p.id === 'product-3')?.imageUrl!,
   },
   {
     id: '4',
@@ -71,6 +78,7 @@ const products: Product[] = [
     images: [{ id: 'product-4', url: PlaceHolderImages.find(p => p.id === 'product-4')?.imageUrl!, alt: 'A handwoven wool blanket with geometric patterns.', hint: 'woven blanket' }],
     artistId: '1',
     category: 'Textiles',
+    imageUrl: PlaceHolderImages.find(p => p.id === 'product-4')?.imageUrl!,
   },
   {
     id: '5',
@@ -81,6 +89,7 @@ const products: Product[] = [
     images: [{ id: 'product-5', url: PlaceHolderImages.find(p => p.id === 'product-5')?.imageUrl!, alt: 'A set of four scented soy candles in glass jars.', hint: 'scented candles' }],
     artistId: '3',
     category: 'Home Goods',
+    imageUrl: PlaceHolderImages.find(p => p.id === 'product-5')?.imageUrl!,
   },
   {
     id: '6',
@@ -91,6 +100,7 @@ const products: Product[] = [
     images: [{ id: 'product-6', url: PlaceHolderImages.find(p => p.id === 'product-6')?.imageUrl!, alt: 'A leather-bound journal with embossed details.', hint: 'leather journal' }],
     artistId: '2',
     category: 'Home Goods',
+    imageUrl: PlaceHolderImages.find(p => p.id === 'product-6')?.imageUrl!,
   },
   {
     id: '7',
@@ -101,6 +111,7 @@ const products: Product[] = [
     images: [{ id: 'product-7', url: PlaceHolderImages.find(p => p.id === 'product-7')?.imageUrl!, alt: 'A watercolor print of a forest landscape.', hint: 'watercolor print' }],
     artistId: '2',
     category: 'Prints',
+    imageUrl: PlaceHolderImages.find(p => p.id === 'product-7')?.imageUrl!,
   },
   {
     id: '8',
@@ -111,6 +122,7 @@ const products: Product[] = [
     images: [{ id: 'product-8', url: PlaceHolderImages.find(p => p.id === 'product-8')?.imageUrl!, alt: 'A hand-carved wooden bowl.', hint: 'wooden bowl' }],
     artistId: '1',
     category: 'Home Goods',
+    imageUrl: PlaceHolderImages.find(p => p.id === 'product-8')?.imageUrl!,
   },
 ];
 

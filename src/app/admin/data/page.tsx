@@ -2,21 +2,21 @@
 "use client"
 
 import { useState } from "react"
-import { getFirestore, writeBatch, doc } from "firebase/firestore"
+import { writeBatch, doc } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { getProducts, getArtists, getCategories } from "@/lib/data"
-import { initializeFirebase } from "@/firebase"
+import { useFirestore } from "@/firebase"
 import { Loader2 } from "lucide-react"
 
 export default function DataPage() {
   const { toast } = useToast()
   const [isSeeding, setIsSeeding] = useState(false)
+  const firestore = useFirestore();
 
   const handleSeedDatabase = async () => {
     setIsSeeding(true)
-    const { firestore } = initializeFirebase()
     if (!firestore) {
       toast({
         variant: "destructive",
