@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import CartSheet from './cart-sheet';
 import { useCart } from '@/hooks/use-cart';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 const navLinks = [
@@ -20,6 +20,12 @@ export default function Header() {
   const { totalItems } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm">
@@ -43,7 +49,7 @@ export default function Header() {
           </div>
           <Button variant="ghost" size="icon" onClick={() => setIsCartOpen(true)}>
             <ShoppingBag className="h-6 w-6" />
-            {totalItems > 0 && (
+            {isClient && totalItems > 0 && (
               <span className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                 {totalItems}
               </span>
