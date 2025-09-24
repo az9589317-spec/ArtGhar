@@ -5,7 +5,7 @@ import { useParams, notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { initialOrders, type Order } from "../page";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -40,51 +40,71 @@ export default function OrderDetailsPage() {
             <span className="sr-only">Back to orders</span>
           </Link>
         </Button>
-        <div>
-          <h1 className="text-2xl font-bold">Order {order.id}</h1>
-          <p className="text-muted-foreground">{order.date}</p>
+        <div className="flex-grow">
+          <h1 className="text-xl md:text-2xl font-bold truncate">Order {order.id}</h1>
+          <p className="text-sm text-muted-foreground">{order.date}</p>
         </div>
-        <Badge variant={statusVariantMap[order.status]} className="ml-auto text-base">{order.status}</Badge>
+        <Badge variant={statusVariantMap[order.status]} className="ml-auto text-base flex-shrink-0">{order.status}</Badge>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
+      <div className="grid lg:grid-cols-3 gap-8 items-start">
+        <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Products Ordered</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[80px]">Image</TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead className="text-center">Qty</TableHead>
-                    <TableHead className="text-right">Price</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {order.products.map(product => (
-                    <TableRow key={product.id}>
-                      <TableCell>
-                        <div className="relative h-16 w-16 rounded-md overflow-hidden border">
-                          <Image src={product.image} alt={product.name} fill className="object-cover" />
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium">{product.name}</TableCell>
-                      <TableCell className="text-center">{product.quantity}</TableCell>
-                      <TableCell className="text-right">₹{product.price.toFixed(2)}</TableCell>
-                      <TableCell className="text-right">₹{(product.price * product.quantity).toFixed(2)}</TableCell>
+              {/* Desktop Table View */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[80px]">Image</TableHead>
+                      <TableHead>Product</TableHead>
+                      <TableHead className="text-center">Qty</TableHead>
+                      <TableHead className="text-right">Price</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {order.products.map(product => (
+                      <TableRow key={product.id}>
+                        <TableCell>
+                          <div className="relative h-16 w-16 rounded-md overflow-hidden border">
+                            <Image src={product.image} alt={product.name} fill className="object-cover" />
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium">{product.name}</TableCell>
+                        <TableCell className="text-center">{product.quantity}</TableCell>
+                        <TableCell className="text-right">₹{product.price.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">₹{(product.price * product.quantity).toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-4">
+                {order.products.map(product => (
+                  <Card key={product.id} className="overflow-hidden">
+                    <div className="flex gap-4">
+                        <div className="relative h-24 w-24 flex-shrink-0">
+                             <Image src={product.image} alt={product.name} fill className="object-cover" />
+                        </div>
+                        <div className="flex-grow p-4">
+                            <p className="font-medium">{product.name}</p>
+                            <p className="text-sm text-muted-foreground">Qty: {product.quantity}</p>
+                            <p className="text-sm font-bold mt-2">₹{(product.price * product.quantity).toFixed(2)}</p>
+                        </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="space-y-6">
+        <div className="lg:col-span-1 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Customer & Shipping</CardTitle>
