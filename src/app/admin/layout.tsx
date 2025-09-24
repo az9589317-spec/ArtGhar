@@ -1,3 +1,4 @@
+
 "use client"
 import {
   SidebarProvider,
@@ -16,6 +17,7 @@ import {
   ShoppingBag,
   Users,
   Image as ImageIcon,
+  Receipt,
 } from "lucide-react"
 import { Logo } from "@/components/logo"
 import Link from "next/link"
@@ -45,6 +47,18 @@ export default function AdminLayout({
                 <Link href="/admin">
                   <LayoutDashboard />
                   <span>Dashboard</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname.startsWith("/admin/sales")}
+                tooltip="Sales"
+              >
+                <Link href="/admin/sales">
+                  <Receipt />
+                  <span>Sales</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
