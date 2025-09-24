@@ -1,3 +1,4 @@
+
 "use client"
 
 import Image from 'next/image';
@@ -31,7 +32,7 @@ export default function Home() {
     Autoplay({ delay: 4000, stopOnInteraction: true })
   )
 
-  const heroProducts = products?.slice(0, 3) || [];
+  const heroProducts = products?.filter(p => p.imageUrl).slice(0, 3) || [];
 
   return (
     <div className="flex flex-col">
@@ -51,13 +52,15 @@ export default function Home() {
               {heroProducts.map((product) => (
                 <CarouselItem key={product.id}>
                   <div className="relative w-full h-[60vh] md:h-[70vh]">
-                    <Image
-                      src={product.imageUrl}
-                      alt={product.name}
-                      fill
-                      className="object-cover"
-                      priority={heroProducts.indexOf(product) === 0}
-                    />
+                    {product.imageUrl && (
+                        <Image
+                            src={product.imageUrl}
+                            alt={product.name}
+                            fill
+                            className="object-cover"
+                            priority={heroProducts.indexOf(product) === 0}
+                        />
+                    )}
                     <div className="absolute inset-0 bg-black/40" />
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-4">
                       <h2 className="text-4xl md:text-6xl font-headline font-bold drop-shadow-lg">
