@@ -18,6 +18,7 @@ import {
   Users,
   Image as ImageIcon,
   Receipt,
+  Package,
 } from "lucide-react"
 import { Logo } from "@/components/logo"
 import Link from "next/link"
@@ -47,6 +48,18 @@ export default function AdminLayout({
                 <Link href="/admin">
                   <LayoutDashboard />
                   <span>Dashboard</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname.startsWith("/admin/orders")}
+                tooltip="Orders"
+              >
+                <Link href="/admin/orders">
+                  <Package />
+                  <span>Orders</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
