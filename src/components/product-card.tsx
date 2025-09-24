@@ -30,17 +30,25 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { toast } = useToast();
 
   const handleAddToCart = () => {
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.imageUrl,
-      slug: product.slug,
-    });
-    toast({
-      title: "Added to cart!",
-      description: `${product.name} is now in your cart.`,
-    });
+    if (product.imageUrl) {
+        addItem({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.imageUrl,
+          slug: product.slug,
+        });
+        toast({
+          title: "Added to cart!",
+          description: `${product.name} is now in your cart.`,
+        });
+    } else {
+        toast({
+          variant: "destructive",
+          title: "Image missing",
+          description: "This product cannot be added to the cart as it is missing an image.",
+        });
+    }
   };
   
   return (
