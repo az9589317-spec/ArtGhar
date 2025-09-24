@@ -22,6 +22,7 @@ import {
 import { Logo } from "@/components/logo"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { SheetTitle } from "@/components/ui/sheet"
 
 export default function AdminLayout({
   children,
@@ -34,6 +35,7 @@ export default function AdminLayout({
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
+          <SheetTitle className="sr-only">Admin Menu</SheetTitle>
           <Logo />
         </SidebarHeader>
         <SidebarContent>
