@@ -1,3 +1,76 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-1",
+      "description": "An artist's sunlit studio with pottery and paints.",
+      "imageUrl": "https://images.unsplash.com/photo-1570386230314-9fe8204c6f80?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8YXJ0aXN0JTIwc3R1ZGlvfGVufDB8fHx8MTc1ODcyNDMyM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "artist studio"
+    },
+    {
+      "id": "product-1",
+      "description": "A set of handcrafted ceramic mugs.",
+      "imageUrl": "https://images.unsplash.com/photo-1669329597053-993120e439ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjZXJhbWljJTIwbXVnc3xlbnwwfHx8fDE3NTg2OTk0ODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ceramic mugs"
+    },
+    {
+      "id": "product-2",
+      "description": "An abstract oil painting with vibrant colors.",
+      "imageUrl": "https://images.unsplash.com/photo-1531489956451-20957fab52f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxhYnN0cmFjdCUyMHBhaW50aW5nfGVufDB8fHx8MTc1ODY4NDU3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract painting"
+    },
+    {
+      "id": "product-3",
+      "description": "A delicate silver necklace with a leaf pendant.",
+      "imageUrl": "https://images.unsplash.com/photo-1611012844392-f4f96c7fd052?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxzaWx2ZXIlMjBuZWNrbGFjZXxlbnwwfHx8fDE3NTg3MjY1NzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "silver necklace"
+    },
+    {
+      "id": "product-4",
+      "description": "A handwoven wool blanket with geometric patterns.",
+      "imageUrl": "https://images.unsplash.com/photo-1673540804277-d6950c8b384f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3b3ZlbiUyMGJsYW5rZXR8ZW58MHx8fHwxNzU4NjMwNTE3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woven blanket"
+    },
+    {
+      "id": "product-5",
+      "description": "A set of four scented soy candles in glass jars.",
+      "imageUrl": "https://images.unsplash.com/photo-1596433809252-260c2745dfdd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzY2VudGVkJTIwY2FuZGxlc3xlbnwwfHx8fDE3NTg3MDY1MTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "scented candles"
+    },
+    {
+      "id": "product-6",
+      "description": "A leather-bound journal with embossed details.",
+      "imageUrl": "https://images.unsplash.com/photo-1690507369594-b370f7d72868?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bGVhdGhlciUyMGpvdXJuYWx8ZW58MHx8fHwxNzU4NzI2NTcwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "leather journal"
+    },
+    {
+      "id": "product-7",
+      "description": "A watercolor print of a forest landscape.",
+      "imageUrl": "https://images.unsplash.com/photo-1724589882384-6eee2d1fb03a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx3YXRlcmNvbG9yJTIwcHJpbnR8ZW58MHx8fHwxNzU4NzI2NTcwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "watercolor print"
+    },
+    {
+      "id": "product-8",
+      "description": "A hand-carved wooden bowl.",
+      "imageUrl": "https://images.unsplash.com/photo-1740993384893-8163a2075022?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3b29kZW4lMjBib3dsfGVufDB8fHx8MTc1ODcyNjU3MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wooden bowl"
+    },
+    {
+      "id": "artist-1",
+      "description": "Portrait of artist Elena Vance.",
+      "imageUrl": "https://images.unsplash.com/photo-1486413869840-a99ac0a4c031?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxhcnRpc3QlMjBwb3J0cmFpdHxlbnwwfHx8fDE3NTg3MTk2MTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "artist portrait"
+    },
+    {
+      "id": "artist-2",
+      "description": "Portrait of artist Marcus Reid.",
+      "imageUrl": "https://images.unsplash.com/photo-1624918941507-6a97d03bb914?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxhcnRpc3QlMjBwb3J0cmFpdHxlbnwwfHx8fDE3NTg3MTk2MTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "artist portrait"
+    },
+    {
+      "id": "artist-3",
+      "description": "Portrait of artist Clara Jenkins.",
+      "imageUrl": "https://images.unsplash.com/photo-1745165589534-b5ba2845a0e3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxhcnRpc3QlMjBwb3J0cmFpdHxlbnwwfHx8fDE3NTg3MTk2MTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "artist portrait"
+    }
+  ]
 }
