@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { AddToCartButton } from './add-to-cart-button';
+import { BuyNowButton } from './buy-now-button';
 
 type ProductPageProps = {
   params: {
@@ -51,8 +52,9 @@ export default function ProductPage({ params }: ProductPageProps) {
           <div className="mt-6 prose max-w-none text-foreground/80">
             <p>{product.description}</p>
           </div>
-          <div className="mt-8">
+          <div className="mt-8 flex items-center gap-4">
             <AddToCartButton product={product} />
+            <BuyNowButton product={product} />
           </div>
         </div>
       </div>

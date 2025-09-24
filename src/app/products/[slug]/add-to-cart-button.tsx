@@ -25,7 +25,7 @@ export function AddToCartButton({ product }: { product: Product }) {
   };
 
   return (
-    <Button size="lg" onClick={handleAddToCart}>
+    <Button size="lg" variant="outline" onClick={handleAddToCart}>
       <ShoppingBag className="mr-2 h-5 w-5" />
       Add to Cart
     </Button>
