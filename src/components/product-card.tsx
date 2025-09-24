@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Image as ImageIcon } from 'lucide-react';
 import type { Artist, Product } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -48,12 +48,18 @@ export default function ProductCard({ product }: ProductCardProps) {
       <CardHeader className="p-0 border-b">
         <Link href={`/products/${product.slug}`} className="block">
           <div className="aspect-square relative overflow-hidden">
-            <Image
-              src={product.imageUrl}
-              alt={product.name}
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-            />
+            {product.imageUrl ? (
+                <Image
+                    src={product.imageUrl}
+                    alt={product.name}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+            ) : (
+                <div className="flex h-full w-full items-center justify-center bg-muted">
+                    <ImageIcon className="h-16 w-16 text-muted-foreground" />
+                </div>
+            )}
           </div>
         </Link>
       </CardHeader>
