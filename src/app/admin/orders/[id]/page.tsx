@@ -57,7 +57,7 @@ export default function OrderDetailsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[80px] hidden sm:table-cell">Image</TableHead>
+                    <TableHead className="w-[80px]">Image</TableHead>
                     <TableHead>Product</TableHead>
                     <TableHead className="text-center">Qty</TableHead>
                     <TableHead className="text-right">Price</TableHead>
@@ -67,7 +67,7 @@ export default function OrderDetailsPage() {
                 <TableBody>
                   {order.products.map(product => (
                     <TableRow key={product.id}>
-                      <TableCell className="hidden sm:table-cell">
+                      <TableCell>
                         <div className="relative h-16 w-16 rounded-md overflow-hidden border">
                           <Image src={product.image} alt={product.name} fill className="object-cover" />
                         </div>
