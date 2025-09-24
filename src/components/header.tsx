@@ -13,6 +13,7 @@ const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/products', label: 'Shop' },
   { href: '/artists', label: 'Artists' },
+  { href: '/admin', label: 'Admin' },
 ];
 
 export default function Header() {
