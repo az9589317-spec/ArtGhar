@@ -19,6 +19,7 @@ import {
   Image as ImageIcon,
   Receipt,
   Package,
+  Database,
 } from "lucide-react"
 import { Logo } from "@/components/logo"
 import Link from "next/link"
@@ -108,6 +109,18 @@ export default function AdminLayout({
                 <Link href="/admin/slider">
                   <ImageIcon />
                   <span>Homepage Slider</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname.startsWith("/admin/data")}
+                tooltip="Data Management"
+              >
+                <Link href="/admin/data">
+                  <Database />
+                  <span>Data</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
