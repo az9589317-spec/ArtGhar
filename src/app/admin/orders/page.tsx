@@ -1,7 +1,8 @@
+
 "use client"
 
 import { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -25,12 +26,21 @@ const initialOrders: Order[] = [
 ];
 
 const statusVariantMap: Record<OrderStatus, "default" | "secondary" | "destructive" | "outline"> = {
-    Pending: "default",
-    Processing: "secondary",
+    Pending: "secondary",
+    Processing: "default",
     Shipped: "outline",
-    Delivered: "secondary", // Would be nice to have a success variant
+    Delivered: "default", 
     Cancelled: "destructive",
 }
+
+const statusColorMap: Record<OrderStatus, string> = {
+    Pending: "bg-yellow-500",
+    Processing: "bg-blue-500",
+    Shipped: "bg-purple-500",
+    Delivered: "bg-green-500",
+    Cancelled: "bg-red-500",
+}
+
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
@@ -51,44 +61,91 @@ export default function AdminOrdersPage() {
         </CardHeader>
         <CardContent>
           {orders.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order ID</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Order ID</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">{order.id}</TableCell>
+                        <TableCell>{order.customer}</TableCell>
+                        <TableCell>{order.date}</TableCell>
+                        <TableCell>
+                           <Select
+                            value={order.status}
+                            onValueChange={(newStatus: OrderStatus) => handleStatusChange(order.id, newStatus)}
+                          >
+                            <SelectTrigger className="w-[140px] h-9 focus:ring-0">
+                                <Badge variant={statusVariantMap[order.status]}>
+                                    <div className={`w-2 h-2 rounded-full mr-2 ${statusColorMap[order.status]}`} />
+                                    {order.status}
+                                </Badge>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Pending">Pending</SelectItem>
+                              <SelectItem value="Processing">Processing</SelectItem>
+                              <SelectItem value="Shipped">Shipped</SelectItem>
+                              <SelectItem value="Delivered">Delivered</SelectItem>
+                              <SelectItem value="Cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-4">
                 {orders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id}</TableCell>
-                    <TableCell>{order.customer}</TableCell>
-                    <TableCell>{order.date}</TableCell>
-                    <TableCell>
-                      <Select
-                        value={order.status}
-                        onValueChange={(newStatus: OrderStatus) => handleStatusChange(order.id, newStatus)}
-                      >
-                        <SelectTrigger className="w-[140px] h-9">
-                          <SelectValue placeholder="Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Pending">Pending</SelectItem>
-                          <SelectItem value="Processing">Processing</SelectItem>
-                          <SelectItem value="Shipped">Shipped</SelectItem>
-                          <SelectItem value="Delivered">Delivered</SelectItem>
-                          <SelectItem value="Cancelled">Cancelled</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
-                  </TableRow>
+                    <Card key={order.id} className="w-full">
+                        <CardHeader>
+                            <CardTitle className="text-lg">{order.id}</CardTitle>
+                            <p className="text-sm text-muted-foreground">{order.date}</p>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                             <div>
+                                <p className="font-medium">{order.customer}</p>
+                                <p className="text-sm text-muted-foreground">Customer</p>
+                            </div>
+                             <div>
+                                <p className="font-bold text-lg">₹{order.total.toFixed(2)}</p>
+                                <p className="text-sm text-muted-foreground">Total</p>
+                            </div>
+                        </CardContent>
+                        <CardFooter>
+                            <Select
+                                value={order.status}
+                                onValueChange={(newStatus: OrderStatus) => handleStatusChange(order.id, newStatus)}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Pending">Pending</SelectItem>
+                                    <SelectItem value="Processing">Processing</SelectItem>
+                                    <SelectItem value="Shipped">Shipped</SelectItem>
+                                    <SelectItem value="Delivered">Delivered</SelectItem>
+                                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </CardFooter>
+                    </Card>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+            </>
           ) : (
             <p className="text-center text-muted-foreground py-12">No orders to display yet.</p>
           )}
