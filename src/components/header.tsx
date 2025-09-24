@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import CartSheet from './cart-sheet';
 import { useCart } from '@/hooks/use-cart';
 import { useState } from 'react';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -57,9 +57,13 @@ export default function Header() {
                   <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[300px]">
-                <div className="p-6">
-                  <Logo />
+              <SheetContent side="left" className="w-[300px] flex flex-col">
+                <SheetHeader className="p-6 pb-0">
+                  <SheetTitle>
+                     <Logo />
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="p-6 pt-2">
                   <nav className="mt-8 flex flex-col gap-4">
                     {navLinks.map((link) => (
                       <Link
