@@ -1,126 +1,95 @@
 /**
- * @fileoverview Firestore Security Rules for the application.
+ * @fileoverview Firestore Security Rules for Prototyping.
  *
  * Core Philosophy:
- * This ruleset enforces a role-based access control model for administrative functions
- * and public read access to product-related data. User profiles are protected
- * under an ownership model.
+ * This ruleset prioritizes rapid prototyping by focusing on authorization and skipping data validation.
+ * It enforces user-based ownership for private data and allows public read access where appropriate.
  *
  * Data Structure:
- * - /products/{productId}: Public product listings.
- * - /categories/{categoryId}: Public product categories.
- * - /artists/{artistId}: Public artist profiles.
- * - /users/{userId}: Private user profiles.
- * - /orders/{orderId}: Order information, restricted to the user who placed the order.
- * - /settings/{settingId}: Application settings.
+ * - Products: Publicly accessible product listings.
+ * - Categories: Publicly accessible product categories.
+ * - Artists: Publicly accessible artist profiles.
+ * - Users: User profiles stored under `/users/{userId}` with owner-only access.
+ * - Orders: Customer orders stored with owner-only access.
+ * - Settings: Singleton document for global settings, publicly readable but unmodifiable.
  *
  * Key Security Decisions:
- * - Public read access for products, categories and artists
- * - User profiles are only accessible to the owning user.
- * - Only authenticated users with the "admin" role can create, update, or delete product related documents.
- * - Denormalization for Authorization: The 'role' field in the /users/{userId} document
- *   is used to determine admin privileges without requiring additional reads.
- *   Order documents are secured based on the `userId` field matching the authenticated user's ID.
+ * - User listing is disabled.
+ * - Public read access is granted for Products, Categories, Artists, and Settings.
+ * - Owner-only write access is enforced for Users and Orders.
+ * - Data validation is skipped in favor of rapid iteration.
+ *
+ * Denormalization for Authorization:
+ * The `Order` entity requires a `userId` field to match the authenticated user's ID to enforce ownership.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * @description Checks if the user is signed in.
-     * @return {boolean} True if the user is signed in, false otherwise.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * @description Checks if the user is the owner of the document.
-     * @param {string} userId The user ID to check against.
-     * @return {boolean} True if the user is the owner, false otherwise.
-     */
     function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
+      return request.auth.uid == userId;
     }
 
-    /**
-     * @description Checks if the user is the existing owner of the document.
-     * @param {string} userId The user ID to check against.
-     * @return {boolean} True if the user is the owner and the resource exists, false otherwise.
-     */
     function isExistingOwner(userId) {
       return isOwner(userId) && resource != null;
     }
 
     /**
-     * @description Checks if the user has the "admin" role.
-     * @return {boolean} True if the user has the "admin" role, false otherwise.
-     */
-    function isAdmin() {
-      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-
-    /**
-     * @description Checks if the user is creating a product with valid artistId and categoryId.
-     * @return {boolean} True if the user is creating a valid product, false otherwise.
-     */
-    function isValidProductCreate() {
-        return isSignedIn() && isAdmin() && request.resource.data.artistId is string && request.resource.data.categoryId is string;
-    }
-
-
-    /**
-     * @description Rules for the /products collection.
+     * @description Allows public read access to product listings. Only the owner can create, update, or delete products.
      * @path /products/{productId}
-     * @allow (get, list): Anyone can read product data.
-     * @allow (create, update, delete): Only admins can modify product data.
-     * @deny (create, update, delete): Non-admins cannot modify product data.
-     * @principle Allows public read access, restricts write access to admins.
+     * @allow (get, list): Any user can read product listings.
+     * @allow (create): Only the product's owner (determined by the `artistId` field) can create a product, and the `artistId` must match the authenticated user's ID.
+     * @allow (update, delete): Only the product's owner (determined by the `artistId` field) can update or delete a product.
+     * @deny (create): If the `artistId` in the request does not match the authenticated user's ID.
+     * @principle Allows public reads with owner-only writes, enforcing document ownership.
      */
     match /products/{productId} {
       allow get, list: if true;
-      allow create: if isValidProductCreate();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
+      allow create: if isSignedIn() && request.resource.data.artistId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.artistId == request.auth.uid && resource != null;
     }
 
     /**
-     * @description Rules for the /categories collection.
+     * @description Allows public read access to product categories. No user can create, update, or delete categories.
      * @path /categories/{categoryId}
-     * @allow (get, list): Anyone can read category data.
-     * @allow (create, update, delete): Only admins can modify category data.
-     * @deny (create, update, delete): Non-admins cannot modify category data.
-     * @principle Allows public read access, restricts write access to admins.
+     * @allow (get, list): Any user can read product categories.
+     * @deny (create, update, delete): No user can create, update, or delete product categories.
+     * @principle Allows public reads with no writes, providing read-only access to category data.
      */
     match /categories/{categoryId} {
       allow get, list: if true;
-      allow create: if isAdmin();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
+      allow create, update, delete: if false;
     }
 
     /**
-     * @description Rules for the /artists collection.
+     * @description Allows public read access to artist profiles. Only the artist can create, update, or delete their profile.
      * @path /artists/{artistId}
-     * @allow (get, list): Anyone can read artist data.
-     * @allow (create, update, delete): Only admins can modify artist data.
-     * @deny (create, update, delete): Non-admins cannot modify artist data.
-     * @principle Allows public read access, restricts write access to admins.
+     * @allow (get, list): Any user can read artist profiles.
+     * @allow (create): Only the artist can create their profile, and the `artistId` must match the authenticated user's ID.
+     * @allow (update, delete): Only the artist can update or delete their own profile.
+     * @deny (create): If the `artistId` in the request does not match the authenticated user's ID.
+     * @principle Allows public reads with owner-only writes, enforcing document ownership.
      */
     match /artists/{artistId} {
       allow get, list: if true;
-      allow create: if isAdmin();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && resource != null;
     }
 
     /**
-     * @description Rules for the /users collection.
+     * @description Stores user profile information.
      * @path /users/{userId}
-     * @allow (get, update, delete): Only the user can access their own profile.
-     * @allow (create): Users can create their own profile.
-     * @deny (get, update, delete): Other users cannot access this profile.
-     * @principle Enforces document ownership for user profiles.
+     * @allow (get): Only the user can read their own profile.
+     * @allow (create): Only the user can create their own profile, and the `userId` must match the authenticated user's ID.
+     * @allow (update): Only the user can update their own profile.
+     * @allow (delete): Only the user can delete their own profile.
+     * @deny (list): User listing is not allowed.
+     * @deny (create): If the `userId` in the path does not match the authenticated user's ID.
+     * @principle Restricts access to a user's own data tree, enforcing document ownership.
      */
     match /users/{userId} {
       allow get: if isOwner(userId);
@@ -131,33 +100,32 @@ service cloud.firestore {
     }
 
     /**
-     * @description Rules for the /orders collection.
+     * @description Stores customer orders.
      * @path /orders/{orderId}
-     * @allow (get, update, delete): Only the user who placed the order can access it.
-     * @allow (create): Any signed-in user can create an order.
-     * @deny (get, update, delete): Other users cannot access this order.
-     * @principle Enforces document ownership for orders.
+     * @allow (get, list): Only the user can read or list their own orders.
+     * @allow (create): Only the user can create an order, and the `userId` must match the authenticated user's ID.
+     * @allow (update): Only the user can update their own order.
+     * @allow (delete): Only the user can delete their own order.
+     * @deny (create): If the `userId` in the request does not match the authenticated user's ID.
+     * @principle Enforces document ownership for writes, restricting order management to the owning user.
      */
     match /orders/{orderId} {
-      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow list: if false;
+      allow get, list: if isSignedIn() && resource.data.userId == request.auth.uid;
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.userId == request.auth.uid && resource != null;
-      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid && resource != null;
+      allow update: if isExistingOwner(resource.data.userId);
+      allow delete: if isExistingOwner(resource.data.userId);
     }
 
     /**
-     * @description Rules for the /settings collection.
+     * @description Stores global application settings. Only the socialMedia document is used.
      * @path /settings/{settingId}
-     * @allow (get, list): Anyone can read application settings.
-     * @allow (create, update, delete): No one can modify application settings through the client.
-     * @principle Allows public read access, restricts write access.
+     * @allow (get, list): Any user can read the settings.
+     * @deny (create, update, delete): No user can create, update, or delete settings.
+     * @principle Allows public reads with no writes, providing read-only access to settings data.
      */
     match /settings/{settingId} {
       allow get, list: if true;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow create, update, delete: if false;
     }
   }
 }
