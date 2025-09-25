@@ -81,27 +81,15 @@ export default function AddProductPage() {
   });
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+    const file = event.target.files?.[0];
     if (!file) return;
 
-    const apiKey = process.env.NEXT_PUBLIC_FREEIMAGE_API_KEY;
-    if (!apiKey) {
-      toast({
-        variant: "destructive",
-        title: "Upload Failed",
-        description: "Image hosting API key is not configured.",
-      });
-      return;
-    }
-
     setIsUploading(true);
-
     const formData = new FormData();
-    formData.append("key", apiKey);
     formData.append("source", file);
 
     try {
-      const response = await fetch('https://freeimage.host/api/1/upload', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
@@ -112,7 +100,7 @@ export default function AddProductPage() {
         append(result.image.url);
         toast({ title: "Image Uploaded", description: "Your image has been added." });
       } else {
-        throw new Error(result.error?.message || "Unknown error occurred");
+        throw new Error(result.error || "Unknown error occurred during upload.");
       }
     } catch (error: any) {
       console.error("Error uploading image:", error);
@@ -123,9 +111,12 @@ export default function AddProductPage() {
       });
     } finally {
       setIsUploading(false);
-      event.target.value = "";
+      // Clear the file input
+      if (event.target) {
+        event.target.value = "";
+      }
     }
-  }
+  };
 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
