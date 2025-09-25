@@ -12,8 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore, useUser } from '@/firebase';
-import { collection, addDoc, serverTimestamp, doc } from 'firebase/firestore';
+import { useUser, useFirestore } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
 import type { Order, ShippingAddress } from '@/lib/types';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -195,11 +195,11 @@ export default function CheckoutPage() {
   };
 
   if (items.length === 0 && !isProcessing) {
+    router.push('/');
     return (
-      <div className="container mx-auto px-4 py-20 text-center">
-        <h1 className="text-3xl font-headline font-bold">Your cart is empty.</h1>
-        <Button onClick={() => router.push('/')} className="mt-4">Go to Homepage</Button>
-      </div>
+        <div className="container mx-auto px-4 py-20 text-center">
+            <h1 className="text-3xl font-headline font-bold">Your cart is empty. Redirecting...</h1>
+        </div>
     );
   }
 

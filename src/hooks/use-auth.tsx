@@ -1,3 +1,4 @@
+
 "use client"
 
 import {
@@ -7,6 +8,7 @@ import {
   useContext,
   ReactNode,
   useCallback,
+  useMemo,
 } from "react"
 import {
   getAuth,
@@ -15,9 +17,10 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signOut as firebaseSignOut,
+  Auth,
 } from "firebase/auth"
-import { doc, getDoc, setDoc, serverTimestamp, updateDoc } from "firebase/firestore"
-import { initializeFirebase } from "@/firebase"
+import { doc, getDoc, setDoc, serverTimestamp, updateDoc, Firestore } from "firebase/firestore"
+import { useFirebase, useFirebaseApp } from "@/firebase"
 import { adminEmails } from "@/lib/admins"
 import { FirestorePermissionError } from "@/firebase/errors"
 import { errorEmitter } from "@/firebase/error-emitter"
@@ -45,11 +48,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
-  const { auth, firestore } = initializeFirebase()
+
+  // Get auth and firestore from the central Firebase provider
+  const { auth, firestore } = useFirebase();
+
 
   const handleUser = useCallback(
     async (firebaseUser: User | null) => {
-      if (firebaseUser) {
+      if (firebaseUser && firestore) {
         const userRef = doc(firestore, "users", firebaseUser.uid)
         const userDoc = await getDoc(userRef)
         const isAdmin = adminEmails.includes(firebaseUser.email || "")
@@ -108,11 +114,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   )
 
   useEffect(() => {
+    if (!auth) {
+        setLoading(false);
+        return;
+    };
     const unsubscribe = onAuthStateChanged(auth, handleUser)
     return () => unsubscribe()
   }, [auth, handleUser])
 
   const signInWithGoogle = async () => {
+    if (!auth) return;
     const provider = new GoogleAuthProvider()
     try {
       await signInWithPopup(auth, provider)
@@ -122,6 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const signOut = async () => {
+     if (!auth) return;
     try {
       await firebaseSignOut(auth)
     } catch (error) {
@@ -138,6 +150,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   )
 }
 
+// This hook can be used by any component within AuthProvider
 export const useAuth = () => {
   const context = useContext(AuthContext)
   if (context === undefined) {
@@ -146,6 +159,7 @@ export const useAuth = () => {
   return context
 }
 
+// This hook is for convenience to get user-specific data
 export const useUser = () => {
   const context = useContext(AuthContext)
   if (context === undefined) {
