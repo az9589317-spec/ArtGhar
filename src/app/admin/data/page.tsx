@@ -33,9 +33,9 @@ export default function DataPage() {
       // Seed products
       const products = getProducts()
       products.forEach((product) => {
-        const { images, ...productData } = product; // Exclude local-only fields if necessary
+        const { images, ...productData } = product; // Exclude original images array
         const productRef = doc(firestore, "products", product.id)
-        batch.set(productRef, productData)
+        batch.set(productRef, productData) // productData now contains imageUrl
       })
 
       // Seed artists

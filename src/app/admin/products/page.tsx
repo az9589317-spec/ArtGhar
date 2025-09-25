@@ -1,3 +1,4 @@
+
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -39,14 +40,16 @@ export default function AdminProductsPage() {
               {products.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell className="hidden sm:table-cell">
-                    <div className="relative h-16 w-16 rounded-md overflow-hidden border">
-                      <Image
-                        alt={product.name}
-                        className="object-cover"
-                        src={product.images[0].url}
-                        fill
-                      />
-                    </div>
+                    {product.imageUrl && (
+                      <div className="relative h-16 w-16 rounded-md overflow-hidden border">
+                        <Image
+                          alt={product.name}
+                          className="object-cover"
+                          src={product.imageUrl}
+                          fill
+                        />
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>

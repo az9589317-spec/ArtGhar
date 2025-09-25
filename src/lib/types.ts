@@ -5,12 +5,6 @@ export type Product = {
   slug: string;
   description: string;
   price: number;
-  images: {
-    id: string;
-    url: string;
-    alt: string;
-    hint: string;
-  }[];
   artistId: string;
   category: string;
   imageUrl?: string;
@@ -20,12 +14,6 @@ export type Artist = {
   id: string;
   name: string;
   bio: string;
-  avatar: {
-    id: string;
-    url: string;
-    alt: string;
-    hint: string;
-  };
   avatarUrl?: string;
 };
 

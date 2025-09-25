@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useFieldArray, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
@@ -27,7 +28,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { getArtists, getCategories } from "@/lib/data"
-import { PlusCircle, Trash2 } from "lucide-react"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -45,11 +45,7 @@ const formSchema = z.object({
   category: z.string({
     required_error: "Please select a category.",
   }),
-  images: z.array(z.object({
-    url: z.string().url({ message: "Please enter a valid URL." }),
-    alt: z.string().min(1, { message: "Please enter alt text." }),
-    hint: z.string().optional(),
-  })).min(1, { message: "Please add at least one image." }),
+  imageUrl: z.string().url({ message: "Please enter a valid URL." }),
 });
 
 export default function AddProductPage() {
@@ -66,14 +62,9 @@ export default function AddProductPage() {
       name: "",
       description: "",
       price: 0,
-      images: [{ url: "", alt: "", hint: "" }],
+      imageUrl: "",
     },
   })
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "images"
-  });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values)
@@ -186,55 +177,19 @@ export default function AddProductPage() {
               )}
             />
 
-            <div>
-              <FormLabel>Product Images</FormLabel>
-              <div className="space-y-4 mt-2">
-                {fields.map((field, index) => (
-                  <div key={field.id} className="flex items-end gap-4 p-4 border rounded-md relative">
-                     <FormField
-                        control={form.control}
-                        name={`images.${index}.url`}
-                        render={({ field }) => (
-                        <FormItem className="flex-grow">
-                            <FormLabel>Image URL</FormLabel>
-                            <FormControl>
-                            <Input placeholder="https://..." {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name={`images.${index}.alt`}
-                        render={({ field }) => (
-                        <FormItem className="flex-grow">
-                            <FormLabel>Alt Text</FormLabel>
-                            <FormControl>
-                            <Input placeholder="Brief description of image" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Remove Image</span>
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => append({ url: "", alt: "", hint: "" })}
-                >
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Add Image
-                </Button>
-                 <FormMessage>{form.formState.errors.images?.message}</FormMessage>
-              </div>
-            </div>
+            <FormField
+              control={form.control}
+              name="imageUrl"
+              render={({ field }) => (
+              <FormItem className="flex-grow">
+                  <FormLabel>Product Image URL</FormLabel>
+                  <FormControl>
+                  <Input placeholder="https://..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+              </FormItem>
+              )}
+            />
 
             <Button type="submit">Add Product</Button>
           </form>
