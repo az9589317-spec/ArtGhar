@@ -9,6 +9,7 @@ import { useDoc, useFirestore, useCollection, useMemoFirebase } from '@/firebase
 import { doc, collection, query, where } from 'firebase/firestore';
 import type { Artist, Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { User as UserIcon } from 'lucide-react';
 
 
 export default function ArtistPage() {
@@ -61,13 +62,19 @@ export default function ArtistPage() {
   return (
     <div className="container mx-auto px-4 py-12 md:py-20">
       <div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12 mb-12">
-        <div className="relative h-40 w-40 flex-shrink-0 overflow-hidden rounded-full shadow-lg">
-          <Image
-            src={artist.avatarUrl || ''}
-            alt={artist.name}
-            fill
-            className="object-cover"
-          />
+        <div className="relative h-40 w-40 flex-shrink-0 overflow-hidden rounded-full shadow-lg border">
+          {artist.avatarUrl ? (
+            <Image
+                src={artist.avatarUrl}
+                alt={artist.name}
+                fill
+                className="object-cover"
+            />
+          ) : (
+             <div className="flex h-full w-full items-center justify-center bg-muted">
+                <UserIcon className="h-20 w-20 text-muted-foreground" />
+            </div>
+          )}
         </div>
         <div className="text-center md:text-left">
           <h1 className="text-4xl md:text-5xl font-headline font-bold">{artist.name}</h1>
