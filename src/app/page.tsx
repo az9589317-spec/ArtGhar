@@ -29,7 +29,7 @@ export default function Home() {
   const { data: products, isLoading } = useCollection<Product>(productsQuery);
 
   const plugin = React.useRef(
-    Autoplay({ delay: 4000, stopOnInteraction: true })
+    Autoplay({ delay: 2000, stopOnInteraction: true })
   )
 
   const heroProducts = products?.filter(p => p.imageUrls && p.imageUrls.length > 0).slice(0, 3) || [];
