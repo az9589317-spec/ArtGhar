@@ -38,7 +38,9 @@ export default function AdminDashboard() {
 
   const totalRevenue = useMemoFirebase(() => {
     if (!orders) return 0;
-    return orders.filter(o => o.status === 'Delivered').reduce((acc, order) => acc + order.total, 0);
+    return orders
+        .filter(o => o.status === 'Delivered' || o.status === 'Shipped')
+        .reduce((acc, order) => acc + order.total, 0);
   }, [orders]);
 
   const salesCount = orders?.length ?? 0;
@@ -57,7 +59,7 @@ export default function AdminDashboard() {
               <>
                 <div className="text-2xl font-bold">₹{totalRevenue.toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground">
-                  Based on delivered orders
+                  Based on delivered and shipped orders
                 </p>
               </>
             )}
