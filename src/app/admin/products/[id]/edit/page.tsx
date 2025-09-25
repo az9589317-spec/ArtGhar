@@ -98,33 +98,22 @@ export default function EditProductPage() {
     setIsUploading(true)
     setImagePreview(URL.createObjectURL(file))
 
-    const apiKey = process.env.NEXT_PUBLIC_FREEIMAGE_API_KEY
-    if (!apiKey) {
-      toast({
-        variant: "destructive",
-        title: "Upload Error",
-        description: "Image hosting API key is not configured.",
-      })
-      setIsUploading(false)
-      return
-    }
-
     const formData = new FormData()
     formData.append("source", file)
 
     try {
-      const response = await fetch(`https://freeimage.host/api/1/upload?key=${apiKey}`, {
-        method: "POST",
+      const response = await fetch('/api/upload', {
+        method: 'POST',
         body: formData,
       });
 
       const result = await response.json()
 
-      if (result.status_code === 200) {
-        form.setValue("imageUrl", result.image.url, { shouldValidate: true })
+      if (response.ok) {
+        form.setValue("imageUrl", result.imageUrl, { shouldValidate: true })
         toast({ title: "Image Uploaded", description: "Your new image is ready." })
       } else {
-        throw new Error(result.error?.message || "Unknown error occurred")
+        throw new Error(result.error || "Unknown error occurred")
       }
     } catch (error: any) {
       console.error("Error uploading image:", error);
