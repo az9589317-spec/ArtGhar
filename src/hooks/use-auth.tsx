@@ -8,7 +8,6 @@ import {
   useContext,
   ReactNode,
   useCallback,
-  useMemo,
 } from "react"
 import {
   User,
@@ -42,12 +41,9 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null)
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  const { auth, firestore } = useFirebase();
-
+  
+  const { auth, firestore, user, isUserLoading } = useFirebase();
 
   const handleUser = useCallback(
     async (firebaseUser: User | null) => {
@@ -99,24 +95,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                  setUserProfile(currentProfile);
             }
         }
-        setUser(firebaseUser)
       } else {
-        setUser(null)
         setUserProfile(null)
       }
-      setLoading(false)
     },
     [firestore]
   )
 
   useEffect(() => {
-    if (!auth) {
-        setLoading(false);
-        return;
-    };
-    const unsubscribe = auth.onAuthStateChanged(handleUser)
-    return () => unsubscribe()
-  }, [auth, handleUser])
+    if (!isUserLoading) {
+        handleUser(user);
+    }
+  }, [user, isUserLoading, handleUser])
 
   const signInWithGoogle = async () => {
     if (!auth) return;
@@ -139,7 +129,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, userProfile, signInWithGoogle, signOut }}
+      value={{ user, loading: isUserLoading, userProfile, signInWithGoogle, signOut }}
     >
       {children}
     </AuthContext.Provider>
@@ -161,5 +151,5 @@ export const useUser = () => {
   if (context === undefined) {
     throw new Error("useUser must be used within an AuthProvider")
   }
-  return { user: context.user, loading: context.loading, userProfile: context.userProfile }
+  return { user: context.user, isUserLoading: context.loading, userProfile: context.userProfile }
 }
