@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -7,7 +8,7 @@ import Link from 'next/link';
 import { AddToCartButton } from './add-to-cart-button';
 import { BuyNowButton } from './buy-now-button';
 import { useDoc, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { doc, collection, query, where } from 'firebase/firestore';
+import { doc, collection, query, where, limit } from 'firebase/firestore';
 import type { Artist, Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -18,7 +19,7 @@ export default function ProductPage() {
 
   const productQuery = useMemoFirebase(() => {
     if (!firestore || !slug) return null;
-    return query(collection(firestore, 'products'), where('slug', '==', slug));
+    return query(collection(firestore, 'products'), where('slug', '==', slug), limit(1));
   }, [firestore, slug]);
   
   const { data: products, isLoading: isProductLoading } = useCollection<Product>(productQuery);
@@ -51,14 +52,14 @@ export default function ProductPage() {
     );
   }
 
-  if (!isProductLoading && !product) {
+  if (!product && !isProductLoading) {
     notFound();
   }
 
   // This check is necessary because product can be null here, even if not loading
   if (!product) {
     // You can return a more specific "product not found" component here if you wish
-    return <p>Product not found.</p>;
+    return notFound();
   }
 
 
