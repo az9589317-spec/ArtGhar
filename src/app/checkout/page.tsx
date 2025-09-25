@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser } from '@/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
 import type { ShippingAddress } from '@/lib/types';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -77,32 +77,28 @@ export default function CheckoutPage() {
       shippingCost,
       total: totalPrice + shippingCost,
     };
+    
+    const ordersCollection = collection(firestore, 'orders');
 
-    try {
-      const ordersCollection = collection(firestore, 'orders');
-      const docRef = await addDoc(ordersCollection, orderData);
-      
-      toast({
-        title: "Order Placed!",
-        description: "Thank you for your purchase. Your art is on its way!",
-      });
-      clearCart();
-      router.push(`/my-orders/${docRef.id}`);
-
-    } catch (error) {
-      console.error("Error placing order:", error);
-      const contextualError = new FirestorePermissionError({
-          operation: 'create',
-          path: `orders/[new_id]`,
-          requestResourceData: orderData
-      });
-      errorEmitter.emit('permission-error', contextualError);
-      toast({
-        variant: "destructive",
-        title: "Error Placing Order",
-        description: "There was a problem placing your order. Please try again.",
-      });
-    }
+    addDoc(ordersCollection, orderData)
+      .then((docRef) => {
+        toast({
+          title: "Order Placed!",
+          description: "Thank you for your purchase. Your art is on its way!",
+        });
+        clearCart();
+        router.push(`/my-orders/${docRef.id}`);
+      })
+      .catch((error) => {
+        console.error("Error placing order:", error);
+        const contextualError = new FirestorePermissionError({
+            operation: 'create',
+            path: `orders/[new_id]`,
+            requestResourceData: orderData
+        });
+        errorEmitter.emit('permission-error', contextualError);
+        // Do not use toast here as it is handled by the global error listener
+    });
   };
 
   if (items.length === 0) {

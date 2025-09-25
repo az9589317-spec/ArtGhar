@@ -1,23 +1,19 @@
 /**
  * @file Firestore Security Rules
- * @description This ruleset enforces a strict user-ownership model for shopping carts and user profiles,
- *              while allowing public read access to product, category, and artist information.
- *
- * Data Structure:
- * - /products/{productId}: Public product information.
- * - /categories/{categoryId}: Public category information.
- * - /artists/{artistId}: Public artist information.
- * - /users/{userId}: User profile information, only accessible to the user themselves.
- * - /users/{userId}/shoppingCarts/{cartId}: Shopping carts owned by a specific user.
- *
- * Key Security Decisions:
- * - Public read access for products, categories, and artists.
- * - User-owned shopping carts and user profiles are strictly private.
- * - Users can only create their own user document.
- * - No user listing is allowed.
- *
- * Denormalization for Authorization:
- * - Shopping carts include the userId to allow authorization without additional `get()` calls.
+ * @core_philosophy This ruleset enforces a strict user-ownership model for user-specific data (shopping carts and user profiles) and allows public read access to product, category, and artist information.
+ * @data_structure
+ *  - /products/{productId}: Public product listings.
+ *  - /categories/{categoryId}: Public product categories.
+ *  - /artists/{artistId}: Public artist profiles.
+ *  - /users/{userId}: User profile information, accessible only by the user.
+ *  - /users/{userId}/shoppingCarts/{cartId}: Shopping carts owned by a specific user.
+ * @key_security_decisions
+ *  - Public read access for products, categories, and artists.
+ *  - Strict ownership for user profiles and shopping carts.
+ *  - Users can only manage their own shopping carts.
+ *  - User listing is not allowed.
+ * @denormalization_for_authorization Shopping carts include the `userId` to allow for authorization checks without needing to fetch the user document.
+ * @structural_segregation User-owned shopping carts are stored in a user-specific subcollection (`/users/{userId}/shoppingCarts/{cartId}`) to simplify access control.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -28,7 +24,7 @@ service cloud.firestore {
      * @path /products/{productId}
      * @allow (get, list)
      * @deny (create, update, delete)
-     * @principle Public read, owner-only write
+     * @principle Allows public read access and restricts write access to owners only.
      */
     match /products/{productId} {
       allow get, list: if true;
@@ -41,7 +37,7 @@ service cloud.firestore {
      * @path /categories/{categoryId}
      * @allow (get, list)
      * @deny (create, update, delete)
-     * @principle Public read, owner-only write
+     * @principle Allows public read access and restricts write access to owners only.
      */
     match /categories/{categoryId} {
       allow get, list: if true;
@@ -54,7 +50,7 @@ service cloud.firestore {
      * @path /artists/{artistId}
      * @allow (get, list)
      * @deny (create, update, delete)
-     * @principle Public read, owner-only write
+     * @principle Allows public read access and restricts write access to owners only.
      */
     match /artists/{artistId} {
       allow get, list: if true;
@@ -63,42 +59,51 @@ service cloud.firestore {
     }
 
     /**
-     * @description Enforces user-ownership for shopping carts. Only the owner can read, create, update, or delete their own cart.
+     * @description Allows a user to manage their own shopping carts.
      * @path /users/{userId}/shoppingCarts/{cartId}
-     * @allow (get, list, create, update, delete) User with ID 'user123' can access their own cart.
-     * @deny (get, list, create, update, delete) User with ID 'user456' cannot access 'user123' shopping cart.
+     * @allow (create, get, list, update, delete) User with ID {userId} can (create, get, list, update, delete) cart with ID {cartId} if request.auth.uid == userId.
+     * @deny (create, get, list, update, delete) User with ID {otherUserId} can't (create, get, list, update, delete) cart with ID {cartId} if request.auth.uid != userId.
      * @principle Enforces document ownership for all operations.
      */
     match /users/{userId}/shoppingCarts/{cartId} {
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isSignedIn() && isOwner(userId) && isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isSignedIn() && isExistingOwner(userId);
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
     }
 
     /**
-     * @description Enforces user-ownership for user profiles. Only the user themselves can read, create, update, or delete their profile.
+     * @description Allows a user to manage their own profile.
      * @path /users/{userId}
-     * @allow (create, get, update, delete) User with ID 'user123' can create/access/modify their own profile.
-     * @deny (create, get, update, delete) User with ID 'user456' cannot create/access/modify 'user123' profile.
-     * @principle Enforces document ownership and self-creation.
+     * @allow (create, get, update, delete) User with ID {userId} can (create, get, update, delete) profile with ID {userId} if request.auth.uid == userId.
+     * @deny (create, get, update, delete) User with ID {otherUserId} can't (create, get, update, delete) profile with ID {userId} if request.auth.uid != userId.
+     * @principle Enforces document ownership for all operations.
      */
     match /users/{userId} {
-      allow get: if isSignedIn() && isOwner(userId);
-      allow list: if false;
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isSignedIn() && isOwner(userId) && isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isSignedIn() && isExistingOwner(userId);
+      allow get: if isOwner(userId);
+      allow list: if false; // User listing is not allowed.
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
     }
 
-    // --- Helper functions ---
+    /**
+     * @description Denies access to settings/socialMedia document as the authenticated user lacks the necessary permissions.
+     * @path /settings/socialMedia
+     * @allow
+     * @deny (get) User with ID 7eTHLSxAfUU7B7vltr8TvXeosD23, email az9589317@gmail.com, and role user cannot get the document.
+     * @principle Explicitly denies unauthorized access.
+     */
+    match /settings/socialMedia {
+      allow get, list, create, update, delete: if false;
+    }
+
     function isSignedIn() {
       return request.auth != null;
     }
 
     function isOwner(userId) {
-      return request.auth.uid == userId;
+      return isSignedIn() && request.auth.uid == userId;
     }
 
     function isExistingOwner(userId) {

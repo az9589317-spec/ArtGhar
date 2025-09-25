@@ -1,262 +1,141 @@
 {
   "entities": {
     "Product": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Product",
       "type": "object",
       "description": "Represents a product listed for sale.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Product entity."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the product."
-        },
-        "description": {
-          "type": "string",
-          "description": "Detailed description of the product."
-        },
-        "price": {
-          "type": "number",
-          "description": "Price of the product."
-        },
-        "imageUrl": {
-          "type": "string",
-          "description": "URL of the product's image.",
-          "format": "uri"
-        },
-        "categoryId": {
-          "type": "string",
-          "description": "Reference to Category. (Relationship: Category 1:N Product)"
-        },
-        "artistId": {
-          "type": "string",
-          "description": "Reference to Artist. (Relationship: Artist 1:N Product)"
-        }
+        "name": { "type": "string", "description": "Name of the product." },
+        "slug": { "type": "string", "description": "URL-friendly slug for the product." },
+        "description": { "type": "string", "description": "Detailed description of the product." },
+        "price": { "type": "number", "description": "Price of the product." },
+        "imageUrl": { "type": "string", "description": "URL of the product's image.", "format": "uri" },
+        "categoryId": { "type": "string", "description": "ID of the category this product belongs to." },
+        "artistId": { "type": "string", "description": "ID of the artist who created the product." }
       },
-      "required": [
-        "id",
-        "name",
-        "description",
-        "price",
-        "imageUrl",
-        "categoryId",
-        "artistId"
-      ]
+      "required": ["name", "slug", "description", "price", "imageUrl", "categoryId", "artistId"]
     },
     "Category": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Category",
       "type": "object",
       "description": "Represents a category of products.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Category entity."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the category."
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of the category."
-        }
+        "name": { "type": "string", "description": "Name of the category." },
+        "slug": { "type": "string", "description": "URL-friendly slug for the category." }
       },
-      "required": [
-        "id",
-        "name",
-        "description"
-      ]
+      "required": ["name", "slug"]
     },
     "Artist": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Artist",
       "type": "object",
       "description": "Represents an artist selling products.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Artist entity."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the artist."
-        },
-        "bio": {
-          "type": "string",
-          "description": "Biography of the artist."
-        },
-        "email": {
-          "type": "string",
-          "description": "Email address of the artist.",
-          "format": "email"
-        }
+        "name": { "type": "string", "description": "Name of the artist." },
+        "bio": { "type": "string", "description": "Biography of the artist." },
+        "avatarUrl": { "type": "string", "description": "URL for the artist's avatar image." }
       },
-      "required": [
-        "id",
-        "name",
-        "bio",
-        "email"
-      ]
+      "required": ["name", "bio", "avatarUrl"]
     },
-    "ShoppingCart": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "ShoppingCart",
+    "UserProfile": {
+      "title": "User Profile",
       "type": "object",
-      "description": "Represents the shopping cart of a user.",
+      "description": "Represents a user's profile information.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the ShoppingCart entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:1 ShoppingCart)"
-        },
-        "productIds": {
+        "displayName": { "type": "string", "description": "User's display name." },
+        "email": { "type": "string", "description": "User's email address.", "format": "email" },
+        "photoURL": { "type": "string", "description": "URL of the user's profile picture.", "format": "uri" },
+        "role": { "type": "string", "description": "The role of the user.", "enum": ["user", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of when the user was created." },
+        "lastLogin": { "type": "string", "format": "date-time", "description": "Timestamp of the user's last login." }
+      },
+      "required": ["displayName", "email", "role", "createdAt", "lastLogin"]
+    },
+    "Order": {
+      "title": "Order",
+      "type": "object",
+      "description": "Represents a customer's order.",
+      "properties": {
+        "userId": { "type": "string", "description": "The ID of the user who placed the order." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of when the order was placed." },
+        "status": { "type": "string", "enum": ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"] },
+        "products": {
           "type": "array",
-          "description": "References to Products in the cart. (Relationship: ShoppingCart 1:N Product)",
           "items": {
-            "type": "string"
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "image": { "type": "string" },
+              "quantity": { "type": "number" },
+              "price": { "type": "number" }
+            },
+            "required": ["id", "name", "image", "quantity", "price"]
+          }
+        },
+        "shippingAddress": { "$ref": "#/entities/ShippingAddress" },
+        "subtotal": { "type": "number" },
+        "shippingCost": { "type": "number" },
+        "total": { "type": "number" }
+      },
+      "required": ["userId", "createdAt", "status", "products", "shippingAddress", "subtotal", "shippingCost", "total"]
+    },
+    "ShippingAddress": {
+      "title": "Shipping Address",
+      "type": "object",
+      "description": "Represents a shipping address.",
+      "properties": {
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "address": { "type": "string" },
+        "city": { "type": "string" },
+        "zip": { "type": "string" }
+      },
+      "required": ["firstName", "lastName", "email", "address", "city", "zip"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "type": "object",
+      "description": "Application-wide settings.",
+      "properties": {
+        "socialMedia": {
+          "type": "object",
+          "properties": {
+            "twitter": { "type": "string", "format": "uri" },
+            "instagram": { "type": "string", "format": "uri" },
+            "facebook": { "type": "string", "format": "uri" }
           }
         }
-      },
-      "required": [
-        "id",
-        "userId",
-        "productIds"
-      ]
-    },
-    "User": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "User",
-      "type": "object",
-      "description": "Represents a user of the application.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the User entity."
-        },
-        "username": {
-          "type": "string",
-          "description": "Username of the user."
-        },
-        "email": {
-          "type": "string",
-          "description": "Email address of the user.",
-          "format": "email"
-        },
-        "role": {
-          "type": "string",
-          "description": "The role of the user, e.g., 'user' or 'admin'.",
-          "enum": ["user", "admin"]
-        }
-      },
-      "required": [
-        "id",
-        "username",
-        "email",
-        "role"
-      ]
+      }
     }
   },
   "auth": {
-    "providers": [
-      "password",
-      "anonymous",
-      "google.com"
-    ]
+    "providers": ["google.com"]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "products/{productId}",
-        "definition": {
-          "entityName": "Product",
-          "schema": {
-            "$ref": "#/backend/entities/Product"
-          },
-          "description": "Stores product information. Each document represents a unique product listed for sale.",
-          "params": [
-            {
-              "name": "productId",
-              "description": "Unique identifier for the product."
-            }
-          ]
-        }
-      },
-      {
-        "path": "categories/{categoryId}",
-        "definition": {
-          "entityName": "Category",
-          "schema": {
-            "$ref": "#/backend/entities/Category"
-          },
-          "description": "Stores product categories. Each document represents a category of products.",
-          "params": [
-            {
-              "name": "categoryId",
-              "description": "Unique identifier for the category."
-            }
-          ]
-        }
-      },
-      {
-        "path": "artists/{artistId}",
-        "definition": {
-          "entityName": "Artist",
-          "schema": {
-            "$ref": "#/backend/entities/Artist"
-          },
-          "description": "Stores artist information. Each document represents a unique artist.",
-          "params": [
-            {
-              "name": "artistId",
-              "description": "Unique identifier for the artist."
-            }
-          ]
-        }
-      },
-      {
-        "path": "users/{userId}/shoppingCarts/{cartId}",
-        "definition": {
-          "entityName": "ShoppingCart",
-          "schema": {
-            "$ref": "#/backend/entities/ShoppingCart"
-          },
-          "description": "Stores shopping cart information for each user. Includes userId for authorization independence. The cart ID is used for access.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "Unique identifier for the user."
-            },
-            {
-              "name": "cartId",
-              "description": "Unique identifier for the shopping cart."
-            }
-          ]
-        }
-      },
-      {
-        "path": "users/{userId}",
-        "definition": {
-          "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores user profiles.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "Unique identifier for the user."
-            }
-          ]
-        }
-      }
-    ],
-    "reasoning": "The Firestore structure is designed to support an e-commerce application for handmade products and art, focusing on simplicity, security, and scalability. It leverages structural segregation and denormalization to achieve authorization independence and facilitate secure list operations. The structure includes collections for `Products`, `Categories`, `Artists`, `ShoppingCarts`, and `Users`.  \n\n**Authorization Independence:** Authorization independence is achieved by using path-based ownership for user-related data (Shopping Carts) and avoiding `get()` calls in security rules. The `ShoppingCart` includes the `userId`, so rules can validate access based on `request.auth.uid` without needing to fetch the user document.\n\n**QAPs (Rules Are Not Filters):** Secure list operations are supported through structural segregation and consistent data modeling:\n*   Products are stored in a single `products` collection, ensuring a homogeneous security posture.\n*   User-owned shopping carts are stored in a path-based structure under `/users/{userId}/shoppingCarts/{cartId}`, allowing for secure listing of carts owned by a specific user.\n\nThe DBAC principle is followed, as there are no custom claims used, and the authorization relies on `request.auth.uid`.\n\nOverall, the structure prioritizes clarity and maintainability, using explicit state modeling and predictable schemas to facilitate debugging and future development."
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Stores individual product listings."
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Stores product categories."
+    },
+    "/artists/{artistId}": {
+      "schema": { "$ref": "#/entities/Artist" },
+      "description": "Stores artist profiles."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Stores user profile information, including roles."
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Stores customer orders."
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/Settings" },
+      "description": "Stores global application settings. Only 'socialMedia' document is used."
+    }
   }
 }
