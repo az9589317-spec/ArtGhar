@@ -176,7 +176,7 @@ export default function CheckoutPage() {
             contact: shippingDetails.phone,
         },
         theme: {
-            color: "#F56565"
+            color: "#E07A5F"
         },
         modal: {
             ondismiss: () => {

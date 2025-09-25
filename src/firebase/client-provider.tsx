@@ -22,14 +22,15 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
 
   useEffect(() => {
     // This effect runs only on the client, after the component has mounted.
-    // This is the correct place to initialize Firebase.
+    // This is the correct and safe place to initialize Firebase.
     const services = initializeFirebase();
     setFirebaseServices(services);
   }, []); // Empty dependency array ensures this runs only once
 
   if (!firebaseServices) {
     // Render a loading state or null while Firebase is initializing.
-    // This prevents children from trying to access Firebase before it's ready.
+    // This prevents children from trying to access Firebase before it's ready
+    // and is crucial for preventing server-side execution of this logic.
     return null;
   }
 

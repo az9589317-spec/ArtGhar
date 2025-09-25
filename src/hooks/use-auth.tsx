@@ -20,7 +20,7 @@ import {
   Auth,
 } from "firebase/auth"
 import { doc, getDoc, setDoc, serverTimestamp, updateDoc, Firestore } from "firebase/firestore"
-import { useFirebase, useFirebaseApp } from "@/firebase"
+import { useFirebase } from "@/firebase"
 import { adminEmails } from "@/lib/admins"
 import { FirestorePermissionError } from "@/firebase/errors"
 import { errorEmitter } from "@/firebase/error-emitter"
