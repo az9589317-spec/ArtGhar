@@ -196,11 +196,11 @@ export default function CheckoutPage() {
 
   if (items.length === 0 && !isProcessing) {
     return (
-        <div className="container mx-auto px-4 py-20 text-center">
-            <h1 className="text-3xl font-headline font-bold">Your cart is empty.</h1>
-            <Button onClick={() => router.push('/')} className="mt-4">Go to Homepage</Button>
-        </div>
-    )
+      <div className="container mx-auto px-4 py-20 text-center">
+        <h1 className="text-3xl font-headline font-bold">Your cart is empty.</h1>
+        <Button onClick={() => router.push('/')} className="mt-4">Go to Homepage</Button>
+      </div>
+    );
   }
 
   return (
@@ -226,7 +226,7 @@ export default function CheckoutPage() {
                     <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
                 )} />
                  <FormField control={form.control} name="phone" render={({ field }) => (
-                    <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} disabled={isProcessing} /></FormControl><FormMessage /></Form-Item>
+                    <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
                 )} />
                  <FormField control={form.control} name="address" render={({ field }) => (
                     <FormItem><FormLabel>Address</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
@@ -236,7 +236,7 @@ export default function CheckoutPage() {
                         <FormItem className="col-span-2"><FormLabel>City</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="zip" render={({ field }) => (
-                        <FormItem><FormLabel>ZIP Code</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></Form-Item>
+                        <FormItem><FormLabel>ZIP Code</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
                     )} />
                 </div>
               </CardContent>
@@ -289,5 +289,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
-    
