@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
+import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from "@/firebase"
 import { collection, addDoc } from "firebase/firestore"
 import type { Artist, Category } from "@/lib/types"
 import { Loader2, UploadCloud } from "lucide-react"
@@ -120,24 +120,25 @@ export default function AddProductPage() {
         toast({ variant: "destructive", title: "Error", description: "Firestore is not available" });
         return;
     }
-    try {
-        const slug = values.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-        const productsCollection = collection(firestore, 'products');
-        await addDoc(productsCollection, { ...values, slug });
-        
-        toast({
-            title: "Product Added!",
-            description: `${values.name} has been successfully added to the store.`,
+    
+    const slug = values.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+    const productsCollection = collection(firestore, 'products');
+    const productData = { ...values, slug };
+
+    addDoc(productsCollection, productData).catch(error => {
+        const contextualError = new FirestorePermissionError({
+            operation: 'create',
+            path: 'products/[new_id]',
+            requestResourceData: productData
         });
-        router.push("/admin/products");
-    } catch (error) {
-        console.error("Error adding product:", error);
-        toast({
-            variant: "destructive",
-            title: "Error adding product",
-            description: "There was a problem saving the product. Please try again.",
-        });
-    }
+        errorEmitter.emit('permission-error', contextualError);
+    });
+    
+    toast({
+        title: "Product Added!",
+        description: `${values.name} has been successfully added to the store.`,
+    });
+    router.push("/admin/products");
   }
 
   return (

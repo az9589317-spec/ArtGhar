@@ -23,7 +23,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
-import { useFirestore } from "@/firebase"
+import { useFirestore, errorEmitter, FirestorePermissionError } from "@/firebase"
 import { collection, addDoc } from "firebase/firestore"
 
 const formSchema = z.object({
@@ -98,24 +98,24 @@ export default function AddArtistPage() {
       return;
     }
 
-    try {
-      const { name, bio, avatarUrl } = values;
-      const artistsCollection = collection(firestore, 'artists');
-      await addDoc(artistsCollection, { name, bio, avatarUrl });
-      
-      toast({
-          title: "Artist Added!",
-          description: `${name} has been successfully added.`,
-      });
-      router.push("/admin/artists");
-    } catch (error) {
-        console.error("Error adding artist:", error);
-        toast({
-            variant: "destructive",
-            title: "Error adding artist",
-            description: "There was a problem saving the artist. Please try again.",
+    const { name, bio, avatarUrl } = values;
+    const artistsCollection = collection(firestore, 'artists');
+    const artistData = { name, bio, avatarUrl };
+    
+    addDoc(artistsCollection, artistData).catch(error => {
+        const contextualError = new FirestorePermissionError({
+            operation: 'create',
+            path: 'artists/[new_id]',
+            requestResourceData: artistData
         });
-    }
+        errorEmitter.emit('permission-error', contextualError);
+    });
+    
+    toast({
+        title: "Artist Added!",
+        description: `${name} has been successfully added.`,
+    });
+    router.push("/admin/artists");
   }
 
   return (

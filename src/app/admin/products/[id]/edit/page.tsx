@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-import { useCollection, useDoc, useFirestore, useMemoFirebase } from "@/firebase"
+import { useCollection, useDoc, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from "@/firebase"
 import { collection, doc, updateDoc } from "firebase/firestore"
 import type { Artist, Category, Product } from "@/lib/types"
 import { Skeleton } from "@/components/ui/skeleton";
@@ -110,10 +110,10 @@ export default function EditProductPage() {
       const result = await response.json()
 
       if (response.ok) {
-        form.setValue("imageUrl", result.imageUrl, { shouldValidate: true })
+        form.setValue("imageUrl", result.image.url, { shouldValidate: true })
         toast({ title: "Image Uploaded", description: "Your new image is ready." })
       } else {
-        throw new Error(result.error || "Unknown error occurred")
+        throw new Error(result.error?.message || "Unknown error occurred")
       }
     } catch (error: any) {
       console.error("Error uploading image:", error);
@@ -136,23 +136,23 @@ export default function EditProductPage() {
         toast({ variant: "destructive", title: "Error", description: "Firestore is not available" });
         return;
     }
-    try {
-        const slug = values.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-        await updateDoc(productRef, { ...values, slug });
-        
-        toast({
-            title: "Product Updated!",
-            description: `${values.name} has been successfully updated.`,
+    const slug = values.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+    const productData = { ...values, slug };
+
+    updateDoc(productRef, productData).catch(error => {
+        const contextualError = new FirestorePermissionError({
+            operation: 'update',
+            path: productRef.path,
+            requestResourceData: productData
         });
-        router.push("/admin/products");
-    } catch (error) {
-        console.error("Error updating product:", error);
-        toast({
-            variant: "destructive",
-            title: "Error updating product",
-            description: "There was a problem saving the product. Please try again.",
-        });
-    }
+        errorEmitter.emit('permission-error', contextualError);
+    });
+    
+    toast({
+        title: "Product Updated!",
+        description: `${values.name} has been successfully updated.`,
+    });
+    router.push("/admin/products");
   }
 
   if (isProductLoading) {
