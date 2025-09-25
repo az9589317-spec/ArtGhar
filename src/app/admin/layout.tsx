@@ -20,6 +20,7 @@ import {
   Receipt,
   Package,
   Database,
+  Share2,
 } from "lucide-react"
 import { Logo } from "@/components/logo"
 import Link from "next/link"
@@ -109,6 +110,18 @@ export default function AdminLayout({
                 <Link href="/admin/slider">
                   <ImageIcon />
                   <span>Homepage Slider</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname.startsWith("/admin/social")}
+                tooltip="Social Media"
+              >
+                <Link href="/admin/social">
+                  <Share2 />
+                  <span>Social Media</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
