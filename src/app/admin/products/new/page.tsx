@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
+import React, { useState } from "react"
+import Image from "next/image"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -30,6 +32,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
 import { collection, addDoc } from "firebase/firestore"
 import type { Artist, Category } from "@/lib/types"
+import { Loader2, UploadCloud } from "lucide-react"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -47,13 +50,15 @@ const formSchema = z.object({
   categoryId: z.string({
     required_error: "Please select a category.",
   }),
-  imageUrl: z.string().url({ message: "Please enter a valid URL." }),
+  imageUrl: z.string().url({ message: "Please upload an image." }),
 });
 
 export default function AddProductPage() {
   const router = useRouter()
   const { toast } = useToast()
   const firestore = useFirestore()
+  const [isUploading, setIsUploading] = useState(false)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   
   const artistsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'artists') : null, [firestore]);
   const categoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
@@ -70,6 +75,56 @@ export default function AddProductPage() {
       imageUrl: "",
     },
   })
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return;
+
+    setIsUploading(true)
+    setImagePreview(URL.createObjectURL(file))
+
+    const apiKey = process.env.NEXT_PUBLIC_FREEIMAGE_API_KEY
+    if (!apiKey) {
+      toast({
+        variant: "destructive",
+        title: "Upload Error",
+        description: "Image hosting API key is not configured.",
+      })
+      setIsUploading(false)
+      return
+    }
+
+    const formData = new FormData()
+    formData.append("source", file)
+
+    try {
+      const response = await fetch(`https://freeimage.host/api/1/upload?key=${apiKey}`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json()
+
+      if (result.status_code === 200) {
+        form.setValue("imageUrl", result.image.url, { shouldValidate: true })
+        toast({ title: "Image Uploaded", description: "Your image is ready." })
+      } else {
+        throw new Error(result.error?.message || "Unknown error occurred")
+      }
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      toast({
+        variant: "destructive",
+        title: "Upload Failed",
+        description: error.message || "There was a problem uploading the image.",
+      });
+      setImagePreview(null);
+      form.setValue("imageUrl", "", { shouldValidate: true });
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!firestore) {
@@ -200,15 +255,40 @@ export default function AddProductPage() {
               control={form.control}
               name="imageUrl"
               render={({ field }) => (
-              <FormItem className="flex-grow">
-                  <FormLabel>Product Image URL</FormLabel>
+                <FormItem>
+                  <FormLabel>Product Image</FormLabel>
                   <FormControl>
-                  <Input placeholder="https://..." {...field} />
+                    <div>
+                      <label htmlFor="image-upload" className="cursor-pointer">
+                        <div className="relative flex justify-center items-center h-48 w-full rounded-md border-2 border-dashed border-input bg-background hover:bg-accent text-muted-foreground">
+                          {isUploading ? (
+                            <Loader2 className="h-8 w-8 animate-spin" />
+                          ) : imagePreview ? (
+                            <Image src={imagePreview} alt="Image preview" fill className="object-contain rounded-md p-2" />
+                          ) : (
+                            <div className="text-center">
+                              <UploadCloud className="mx-auto h-8 w-8" />
+                              <p>Click to upload an image</p>
+                              <p className="text-xs">PNG, JPG, GIF up to 10MB</p>
+                            </div>
+                          )}
+                        </div>
+                      </label>
+                      <Input
+                        id="image-upload"
+                        type="file"
+                        className="sr-only"
+                        onChange={handleImageUpload}
+                        accept="image/png, image/jpeg, image/gif"
+                        disabled={isUploading}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
-              </FormItem>
+                </FormItem>
               )}
             />
+
 
             <Button type="submit">Add Product</Button>
           </form>
