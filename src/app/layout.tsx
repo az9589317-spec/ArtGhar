@@ -11,6 +11,7 @@ import Script from 'next/script';
 export const metadata: Metadata = {
   title: 'ArtGhar',
   description: 'An intuitive e-commerce application for artists and crafters to sell handmade products and art.',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -24,6 +25,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400..900;1,400..900&family=Belleza&display=swap" rel="stylesheet" />
+        <meta name="theme-color" content="#f2711c" />
       </head>
       <body className="font-body antialiased flex flex-col min-h-screen">
         <FirebaseClientProvider>
