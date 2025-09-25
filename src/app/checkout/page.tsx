@@ -19,7 +19,7 @@ import type { Order, ShippingAddress } from '@/lib/types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { createOrder, verifyPayment } from '@/app/actions/razorpay';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 
 const shippingFormSchema = z.object({
@@ -61,6 +61,13 @@ export default function CheckoutPage() {
   
   const shippingCost = 40.00;
   const totalAmount = totalPrice + shippingCost;
+
+  // Redirect if cart is empty
+  useEffect(() => {
+    if (items.length === 0 && !isProcessing) {
+      router.push('/');
+    }
+  }, [items.length, isProcessing, router]);
 
 
   const handleSubmit = async (shippingDetails: ShippingAddress) => {
@@ -194,8 +201,7 @@ export default function CheckoutPage() {
     rzp.open();
   };
 
-  if (items.length === 0 && !isProcessing) {
-    router.push('/');
+  if (items.length === 0) {
     return (
         <div className="container mx-auto px-4 py-20 text-center">
             <h1 className="text-3xl font-headline font-bold">Your cart is empty. Redirecting...</h1>
