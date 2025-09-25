@@ -49,22 +49,24 @@ export default function AdminDashboard() {
   return (
     <div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-3/4" /> : (
-              <>
-                <div className="text-2xl font-bold">₹{totalRevenue.toFixed(2)}</div>
-                <p className="text-xs text-muted-foreground">
-                  Based on delivered and shipped orders
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <Link href="/admin/sales">
+          <Card className="hover:bg-muted/50 transition-colors">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoading ? <Skeleton className="h-8 w-3/4" /> : (
+                <>
+                  <div className="text-2xl font-bold">₹{totalRevenue.toFixed(2)}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Based on delivered and shipped orders
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </Link>
         <Link href="/admin/orders">
           <Card className="hover:bg-muted/50 transition-colors">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
