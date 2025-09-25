@@ -1,3 +1,4 @@
+
 'use client';
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, deleteDoc, doc } from "firebase/firestore";
-import type { Product } from "@/lib/types";
+import type { Product, Category } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import {
@@ -41,7 +42,18 @@ export default function AdminProductsPage() {
     return collection(firestore, 'products');
   }, [firestore]);
 
+  const categoriesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'categories');
+  }, [firestore]);
+
   const { data: products, isLoading } = useCollection<Product>(productsQuery);
+  const { data: categories } = useCollection<Category>(categoriesQuery);
+
+  const categoryMap = useMemoFirebase(() => {
+    if (!categories) return new Map();
+    return new Map(categories.map(c => [c.id, c.name]));
+  }, [categories]);
 
   const handleDeleteClick = (product: Product) => {
     setProductToDelete(product);
@@ -130,7 +142,7 @@ export default function AdminProductsPage() {
                   </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{product.category}</Badge>
+                    <Badge variant="outline">{categoryMap.get(product.categoryId) || 'N/A'}</Badge>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     ₹{product.price.toFixed(2)}

@@ -7,7 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { generateArtistBio } from "@/ai/flows/generate-artist-bio";
-import type { Artist, Product } from "@/lib/types";
+import type { Artist, Product, Category } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +15,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection } from "firebase/firestore";
 
 const formSchema = z.object({
   pastSalesDescription: z.string().min(10, "Please provide a bit more detail."),
@@ -29,6 +31,14 @@ export default function GenerateBioForm({ artist, products }: GenerateBioFormPro
   const [bio, setBio] = useState(artist.bio);
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
+  const firestore = useFirestore();
+
+  const categoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
+  const { data: categories } = useCollection<Category>(categoriesQuery);
+  const categoryMap = useMemoFirebase(() => {
+    if (!categories) return new Map();
+    return new Map(categories.map(c => [c.id, c.name]));
+  }, [categories]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -37,7 +47,7 @@ export default function GenerateBioForm({ artist, products }: GenerateBioFormPro
     },
   });
 
-  const productCategories = [...new Set(products.map(p => p.category))].join(', ');
+  const productCategories = [...new Set(products.map(p => categoryMap.get(p.categoryId) || p.categoryId))].join(', ');
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsGenerating(true);

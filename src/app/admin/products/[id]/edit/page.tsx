@@ -46,7 +46,7 @@ const formSchema = z.object({
   artistId: z.string({
     required_error: "Please select an artist.",
   }),
-  category: z.string({
+  categoryId: z.string({
     required_error: "Please select a category.",
   }),
   imageUrl: z.string().url({ message: "Please enter a valid URL." }),
@@ -204,7 +204,7 @@ export default function EditProductPage() {
                 />
                  <FormField
                     control={form.control}
-                    name="category"
+                    name="categoryId"
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Category</FormLabel>
@@ -216,7 +216,7 @@ export default function EditProductPage() {
                             </FormControl>
                             <SelectContent>
                             {categories?.map(category => (
-                                <SelectItem key={category.id} value={category.name}>{category.name}</SelectItem>
+                                <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
                             ))}
                             </SelectContent>
                         </Select>
