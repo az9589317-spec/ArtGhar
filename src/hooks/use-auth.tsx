@@ -8,18 +8,14 @@ import {
   useContext,
   ReactNode,
   useCallback,
-  useMemo,
 } from "react"
 import {
-  getAuth,
-  onAuthStateChanged,
   User,
   GoogleAuthProvider,
   signInWithPopup,
   signOut as firebaseSignOut,
-  Auth,
 } from "firebase/auth"
-import { doc, getDoc, setDoc, serverTimestamp, updateDoc, Firestore } from "firebase/firestore"
+import { doc, getDoc, setDoc, serverTimestamp, updateDoc } from "firebase/firestore"
 import { useFirebase } from "@/firebase"
 import { adminEmails } from "@/lib/admins"
 import { FirestorePermissionError } from "@/firebase/errors"
@@ -118,7 +114,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
         return;
     };
-    const unsubscribe = onAuthStateChanged(auth, handleUser)
+    const unsubscribe = auth.onAuthStateChanged(handleUser)
     return () => unsubscribe()
   }, [auth, handleUser])
 
