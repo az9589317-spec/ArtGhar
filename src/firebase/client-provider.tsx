@@ -6,7 +6,6 @@ import { FirebaseProvider } from '@/firebase/provider';
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
-import { firebaseConfig } from './config';
 
 interface FirebaseClientProviderProps {
   children: ReactNode;
@@ -22,6 +21,17 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
   const [firebaseServices, setFirebaseServices] = useState<FirebaseServices | null>(null);
 
   useEffect(() => {
+    // Define the config object here, inside useEffect, to ensure it's only created on the client.
+    const firebaseConfig = {
+        apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+        authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+        appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+        measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+    };
+
     // This effect runs only on the client, after the component has mounted.
     // This is the correct and safe place to initialize Firebase.
     const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
