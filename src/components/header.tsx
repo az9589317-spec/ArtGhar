@@ -1,3 +1,4 @@
+
 'use client';
 import Link from 'next/link';
 import { Search, ShoppingBag, Menu, LogOut, User } from 'lucide-react';
@@ -18,6 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ScrollArea } from './ui/scroll-area';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -119,35 +121,37 @@ export default function Header() {
                   <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] flex flex-col">
+              <SheetContent side="left" className="w-[300px] flex flex-col p-0">
                 <SheetHeader className="p-6 pb-0">
                   <SheetTitle>
                      <Logo />
                   </SheetTitle>
                 </SheetHeader>
-                <div className="p-6 pt-2">
-                  <nav className="mt-8 flex flex-col gap-4">
-                    {navLinks.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className="text-lg font-medium text-foreground transition-colors hover:text-primary"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {link.label}
-                      </Link>
-                    ))}
-                     {isAdmin && (
+                <ScrollArea className="flex-1">
+                  <div className="p-6 pt-2">
+                    <nav className="mt-8 flex flex-col gap-4">
+                      {navLinks.map((link) => (
                         <Link
-                            href="/admin"
-                            className="text-lg font-medium text-primary transition-colors hover:text-primary/80"
-                            onClick={() => setIsMenuOpen(false)}
+                          key={link.href}
+                          href={link.href}
+                          className="text-lg font-medium text-foreground transition-colors hover:text-primary"
+                          onClick={() => setIsMenuOpen(false)}
                         >
-                            Admin
+                          {link.label}
                         </Link>
-                    )}
-                  </nav>
-                </div>
+                      ))}
+                      {isAdmin && (
+                          <Link
+                              href="/admin"
+                              className="text-lg font-medium text-primary transition-colors hover:text-primary/80"
+                              onClick={() => setIsMenuOpen(false)}
+                          >
+                              Admin
+                          </Link>
+                      )}
+                    </nav>
+                  </div>
+                </ScrollArea>
               </SheetContent>
             </Sheet>
           </div>
@@ -157,3 +161,4 @@ export default function Header() {
     </header>
   );
 }
+
