@@ -101,24 +101,35 @@ export default function EditProductPage() {
     const file = event.target.files?.[0]
     if (!file) return;
 
-    setIsUploading(true)
+    const apiKey = process.env.NEXT_PUBLIC_FREEIMAGE_API_KEY;
+    if (!apiKey) {
+      toast({
+        variant: "destructive",
+        title: "Upload Failed",
+        description: "Image hosting API key is not configured.",
+      });
+      return;
+    }
 
-    const formData = new FormData()
-    formData.append("source", file)
+    setIsUploading(true);
+
+    const formData = new FormData();
+    formData.append("key", apiKey);
+    formData.append("source", file);
 
     try {
-      const response = await fetch('/api/upload', {
+      const response = await fetch('https://freeimage.host/api/1/upload', {
         method: 'POST',
         body: formData,
       });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (response.ok && result.image?.url) {
         append(result.image.url);
-        toast({ title: "Image Uploaded", description: "Your new image has been added." })
+        toast({ title: "Image Uploaded", description: "Your new image has been added." });
       } else {
-        throw new Error(result.error?.message || "Unknown error occurred")
+        throw new Error(result.error?.message || "Unknown error occurred");
       }
     } catch (error: any) {
       console.error("Error uploading image:", error);
@@ -128,7 +139,7 @@ export default function EditProductPage() {
         description: error.message || "There was a problem uploading the image.",
       });
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
       event.target.value = "";
     }
   }
