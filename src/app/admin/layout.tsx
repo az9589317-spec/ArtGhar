@@ -24,8 +24,9 @@ import {
 import { Logo } from "@/components/logo"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useAuth, useUser } from "@/hooks/use-auth"
+import { useUser } from "@/hooks/use-auth"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export default function AdminLayout({
   children,
@@ -43,104 +44,106 @@ export default function AdminLayout({
               <Logo />
             </SidebarHeader>
             <SidebarContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === "/admin"}
-                    tooltip="Dashboard"
-                  >
-                    <Link href="/admin">
-                      <LayoutDashboard />
-                      <span>Dashboard</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith("/admin/orders")}
-                    tooltip="Orders"
-                  >
-                    <Link href="/admin/orders">
-                      <Package />
-                      <span>Orders</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith("/admin/sales")}
-                    tooltip="Sales"
-                  >
-                    <Link href="/admin/sales">
-                      <Receipt />
-                      <span>Sales</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith("/admin/products")}
-                    tooltip="Products"
-                  >
-                    <Link href="/admin/products">
-                      <ShoppingBag />
-                      <span>Products</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith("/admin/artists")}
-                    tooltip="Artists"
-                  >
-                    <Link href="/admin/artists">
-                      <Users />
-                      <span>Artists</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith("/admin/slider")}
-                    tooltip="Homepage Slider"
-                  >
-                    <Link href="/admin/slider">
-                      <ImageIcon />
-                      <span>Homepage Slider</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith("/admin/social")}
-                    tooltip="Social Media"
-                  >
-                    <Link href="/admin/social">
-                      <Share2 />
-                      <span>Social Media</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith("/admin/data")}
-                    tooltip="Data Management"
-                  >
-                    <Link href="/admin/data">
-                      <Database />
-                      <span>Data</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
+              <ScrollArea className="h-full">
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === "/admin"}
+                      tooltip="Dashboard"
+                    >
+                      <Link href="/admin">
+                        <LayoutDashboard />
+                        <span>Dashboard</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname.startsWith("/admin/orders")}
+                      tooltip="Orders"
+                    >
+                      <Link href="/admin/orders">
+                        <Package />
+                        <span>Orders</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname.startsWith("/admin/sales")}
+                      tooltip="Sales"
+                    >
+                      <Link href="/admin/sales">
+                        <Receipt />
+                        <span>Sales</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname.startsWith("/admin/products")}
+                      tooltip="Products"
+                    >
+                      <Link href="/admin/products">
+                        <ShoppingBag />
+                        <span>Products</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname.startsWith("/admin/artists")}
+                      tooltip="Artists"
+                    >
+                      <Link href="/admin/artists">
+                        <Users />
+                        <span>Artists</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname.startsWith("/admin/slider")}
+                      tooltip="Homepage Slider"
+                    >
+                      <Link href="/admin/slider">
+                        <ImageIcon />
+                        <span>Homepage Slider</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname.startsWith("/admin/social")}
+                      tooltip="Social Media"
+                    >
+                      <Link href="/admin/social">
+                        <Share2 />
+                        <span>Social Media</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname.startsWith("/admin/data")}
+                      tooltip="Data Management"
+                    >
+                      <Link href="/admin/data">
+                        <Database />
+                        <span>Data</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </ScrollArea>
             </SidebarContent>
             <SidebarFooter>
                 {user && (
