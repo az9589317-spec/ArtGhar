@@ -27,7 +27,9 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-import { getArtists, getCategories } from "@/lib/data"
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
+import { collection, addDoc } from "firebase/firestore"
+import type { Artist, Category } from "@/lib/types"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -51,10 +53,13 @@ const formSchema = z.object({
 export default function AddProductPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const firestore = useFirestore()
   
-  // These would typically come from an API
-  const artists = getArtists()
-  const categories = getCategories()
+  const artistsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'artists') : null, [firestore]);
+  const categoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
+
+  const { data: artists } = useCollection<Artist>(artistsQuery);
+  const { data: categories } = useCollection<Category>(categoriesQuery);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -66,15 +71,29 @@ export default function AddProductPage() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
-    toast({
-      title: "Product Submitted!",
-      description: "Check the console for the form data. In a real app, this would be saved to a database.",
-    })
-    // Here you would typically call an API to save the product
-    // For now, we'll just navigate back to the products page
-    router.push("/admin/products")
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!firestore) {
+        toast({ variant: "destructive", title: "Error", description: "Firestore is not available" });
+        return;
+    }
+    try {
+        const slug = values.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+        const productsCollection = collection(firestore, 'products');
+        await addDoc(productsCollection, { ...values, slug });
+        
+        toast({
+            title: "Product Added!",
+            description: `${values.name} has been successfully added to the store.`,
+        });
+        router.push("/admin/products");
+    } catch (error) {
+        console.error("Error adding product:", error);
+        toast({
+            variant: "destructive",
+            title: "Error adding product",
+            description: "There was a problem saving the product. Please try again.",
+        });
+    }
   }
 
   return (
@@ -141,7 +160,7 @@ export default function AddProductPage() {
                             </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                            {categories.map(category => (
+                            {categories?.map(category => (
                                 <SelectItem key={category.id} value={category.name}>{category.name}</SelectItem>
                             ))}
                             </SelectContent>
@@ -164,7 +183,7 @@ export default function AddProductPage() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {artists.map(artist => (
+                      {artists?.map(artist => (
                         <SelectItem key={artist.id} value={artist.id}>{artist.name}</SelectItem>
                       ))}
                     </SelectContent>

@@ -1,13 +1,23 @@
 
+'use client';
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getArtists } from "@/lib/data";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection } from "firebase/firestore";
+import type { Artist } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AdminArtistsPage() {
-  const artists = getArtists();
+    const firestore = useFirestore();
+    const artistsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return collection(firestore, 'artists');
+    }, [firestore]);
+
+    const { data: artists, isLoading } = useCollection<Artist>(artistsQuery);
 
   return (
     <div>
@@ -28,13 +38,22 @@ export default function AdminArtistsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {artists.map((artist) => (
+              {isLoading && Array.from({ length: 3 }).map((_, i) => (
+                <TableRow key={i}>
+                    <TableCell>
+                        <Skeleton className="h-12 w-12 rounded-full" />
+                    </TableCell>
+                    <TableCell><Skeleton className="h-6 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-full" /></TableCell>
+                </TableRow>
+              ))}
+              {!isLoading && artists?.map((artist) => (
                 <TableRow key={artist.id}>
                   <TableCell>
                     <div className="relative h-12 w-12 rounded-full overflow-hidden border">
                       <Image 
-                        src={artist.avatar.url} 
-                        alt={artist.avatar.alt} 
+                        src={artist.avatarUrl || ''} 
+                        alt={artist.name} 
                         fill
                         className="object-cover"
                       />
@@ -46,6 +65,9 @@ export default function AdminArtistsPage() {
               ))}
             </TableBody>
           </Table>
+          {!isLoading && artists?.length === 0 && (
+            <p className="text-center text-muted-foreground py-12">No artists found. Add one to get started.</p>
+           )}
         </CardContent>
       </Card>
     </div>

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -22,6 +23,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
+import { useFirestore } from "@/firebase"
+import { collection, addDoc } from "firebase/firestore"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -41,6 +44,7 @@ export default function AddArtistPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [isGenerating, setIsGenerating] = useState(false)
+  const firestore = useFirestore()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -88,13 +92,30 @@ export default function AddArtistPage() {
     }
   }
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
-    toast({
-      title: "Artist Submitted!",
-      description: "Check the console for the form data. In a real app, this would be saved.",
-    })
-    router.push("/admin/artists")
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!firestore) {
+      toast({ variant: "destructive", title: "Error", description: "Firestore is not available" });
+      return;
+    }
+
+    try {
+      const { name, bio, avatarUrl } = values;
+      const artistsCollection = collection(firestore, 'artists');
+      await addDoc(artistsCollection, { name, bio, avatarUrl });
+      
+      toast({
+          title: "Artist Added!",
+          description: `${name} has been successfully added.`,
+      });
+      router.push("/admin/artists");
+    } catch (error) {
+        console.error("Error adding artist:", error);
+        toast({
+            variant: "destructive",
+            title: "Error adding artist",
+            description: "There was a problem saving the artist. Please try again.",
+        });
+    }
   }
 
   return (
