@@ -26,9 +26,10 @@ export default function ProductPage() {
   const product = products?.[0];
 
   const artistRef = useMemoFirebase(() => {
+    // Ensure product and product.artistId exist before creating the ref
     if (!firestore || !product?.artistId) return null;
     return doc(firestore, 'artists', product.artistId);
-  }, [firestore, product?.artistId]);
+  }, [firestore, product]);
   
   const { data: artist, isLoading: isArtistLoading } = useDoc<Artist>(artistRef);
 
@@ -52,13 +53,7 @@ export default function ProductPage() {
     );
   }
 
-  if (!product && !isProductLoading) {
-    notFound();
-  }
-
-  // This check is necessary because product can be null here, even if not loading
   if (!product) {
-    // You can return a more specific "product not found" component here if you wish
     return notFound();
   }
 
@@ -81,11 +76,11 @@ export default function ProductPage() {
           <h1 className="text-3xl md:text-4xl font-headline font-bold">{product.name}</h1>
           {isArtistLoading ? (
              <Skeleton className="h-6 w-1/4 mt-2" />
-          ) : artist && (
+          ) : artist ? (
             <p className="text-lg mt-2 text-muted-foreground">
               by <Link href={`/artists/${artist.id}`} className="text-primary hover:underline">{artist.name}</Link>
             </p>
-          )}
+          ) : null}
           <p className="text-3xl font-bold text-foreground mt-4">₹{product.price.toFixed(2)}</p>
           <div className="mt-6 prose max-w-none text-foreground/80">
             <p>{product.description}</p>
