@@ -4,11 +4,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/hooks/use-cart';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Trash2, ShoppingBag } from 'lucide-react';
 import type { CartItem } from '@/lib/types';
+import { QuantitySelector } from './ui/quantity-selector';
 
 interface CartSheetProps {
   open: boolean;
@@ -81,13 +81,10 @@ function CartSheetItem({ item, onRemove, onUpdateQuantity }: { item: CartItem; o
           </div>
         </div>
         <div className="flex flex-1 items-end justify-between text-sm">
-          <Input
-            type="number"
-            value={item.quantity}
-            onChange={(e) => onUpdateQuantity(item.id, parseInt(e.target.value, 10) || 1)}
-            className="w-20 h-9"
-            min="1"
-          />
+           <QuantitySelector
+              quantity={item.quantity}
+              onQuantityChange={(newQuantity) => onUpdateQuantity(item.id, newQuantity)}
+            />
           <div className="flex">
             <Button variant="ghost" size="sm" onClick={() => onRemove(item.id)}>
               <Trash2 className="h-4 w-4" />

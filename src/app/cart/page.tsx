@@ -4,11 +4,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/hooks/use-cart';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Trash2, ShoppingBag } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { CartItem } from '@/lib/types';
+import { QuantitySelector } from '@/components/ui/quantity-selector';
 
 export default function CartPage() {
   const { items, totalItems, totalPrice, removeItem, updateItemQuantity } = useCart();
@@ -95,12 +95,9 @@ function CartTableRow({ item, onRemove, onUpdateQuantity }: { item: CartItem; on
         <Link href={`/products/${item.slug}`} className="hover:text-primary">{item.name}</Link>
       </TableCell>
       <TableCell>
-        <Input
-          type="number"
-          value={item.quantity}
-          onChange={(e) => onUpdateQuantity(item.id, parseInt(e.target.value, 10) || 1)}
-          className="w-20 h-9"
-          min="1"
+        <QuantitySelector
+          quantity={item.quantity}
+          onQuantityChange={(newQuantity) => onUpdateQuantity(item.id, newQuantity)}
         />
       </TableCell>
       <TableCell className="text-right">₹{(item.price * item.quantity).toFixed(2)}</TableCell>
