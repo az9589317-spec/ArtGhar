@@ -35,7 +35,8 @@ export default function DataPage() {
       products.forEach((product) => {
         const { images, ...productData } = product; // Exclude original images array
         const productRef = doc(firestore, "products", product.id)
-        batch.set(productRef, productData) // productData now contains imageUrl
+        const slug = product.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+        batch.set(productRef, { ...productData, slug }) // productData now contains imageUrl and slug
       })
 
       // Seed artists
