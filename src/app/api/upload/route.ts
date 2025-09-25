@@ -1,9 +1,9 @@
 
 import { NextResponse } from 'next/server';
 
-const apiKey = process.env.FREEIMAGE_API_KEY;
-
 export async function POST(request: Request) {
+  const apiKey = process.env.FREEIMAGE_API_KEY;
+
   if (!apiKey) {
     return NextResponse.json({ error: { message: 'Image hosting API key is not configured.'} }, { status: 500 });
   }
