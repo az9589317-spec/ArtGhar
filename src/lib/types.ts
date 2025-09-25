@@ -62,4 +62,9 @@ export type Order = {
   subtotal: number;
   shippingCost: number;
   total: number;
+  paymentDetails?: {
+    gateway: string;
+    orderId: string;
+    paymentId: string;
+  }
 };
