@@ -113,8 +113,8 @@ service cloud.firestore {
      */
     match /orders/{orderId} {
       allow get: if isOrderOwner();
-      allow list: if false;
-      allow create: if request.auth.uid == request.resource.data.userId;
+      allow list: if request.auth.uid != null;
+      allow create: if request.resource.data.userId == request.auth.uid;
       allow update: if isOrderOwner();
       allow delete: if isOrderOwner();
     }
@@ -130,7 +130,8 @@ service cloud.firestore {
      * @principle Public read, no write access.
      */
     match /settings/{settingId} {
-       allow get, list: if true;
+       allow get: if settingId == 'socialMedia';
+       allow list: if false;
        allow create, update, delete: if false;
     }
 
@@ -146,7 +147,7 @@ service cloud.firestore {
     }
 
     function isOrderOwner() {
-        return isSignedIn() && request.auth.uid == resource.data.userId;
+        return isSignedIn() && resource.data.userId == request.auth.uid;
     }
 
     function isExistingOwner(userId) {
@@ -154,7 +155,7 @@ service cloud.firestore {
     }
 
     function isExistingOrderOwner() {
-        return isSignedIn() && request.auth.uid == resource.data.userId;
+        return isSignedIn() && resource.data.userId == request.auth.uid;
     }
   }
 }
