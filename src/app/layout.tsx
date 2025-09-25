@@ -8,7 +8,7 @@ import { AuthProvider } from '@/hooks/use-auth';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'Artisanal Abode',
+  title: 'ArtGhar',
   description: 'An intuitive e-commerce application for artists and crafters to sell handmade products and art.',
 };
 

@@ -29,7 +29,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     try {
-        const storedCart = localStorage.getItem('artisanal-abode-cart');
+        const storedCart = localStorage.getItem('artghar-cart');
         if (storedCart) {
             setCartItems(JSON.parse(storedCart));
         }
@@ -42,7 +42,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (isInitialized) {
-        localStorage.setItem('artisanal-abode-cart', JSON.stringify(cartItems));
+        localStorage.setItem('artghar-cart', JSON.stringify(cartItems));
     }
   }, [cartItems, isInitialized]);
 

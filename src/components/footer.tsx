@@ -28,7 +28,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <Logo />
           <p className="text-sm text-muted-foreground">
-            &copy; {year} Artisanal Abode. All rights reserved.
+            &copy; {year} ArtGhar. All rights reserved.
           </p>
           <div className="flex gap-4">
             {socialLinks?.twitter && (
