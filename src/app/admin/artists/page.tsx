@@ -9,6 +9,7 @@ import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection } from "firebase/firestore";
 import type { Artist } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { User as UserIcon } from "lucide-react";
 
 export default function AdminArtistsPage() {
     const firestore = useFirestore();
@@ -51,12 +52,18 @@ export default function AdminArtistsPage() {
                 <TableRow key={artist.id}>
                   <TableCell>
                     <div className="relative h-12 w-12 rounded-full overflow-hidden border">
-                      <Image 
-                        src={artist.avatarUrl || ''} 
-                        alt={artist.name} 
-                        fill
-                        className="object-cover"
-                      />
+                      {artist.avatarUrl ? (
+                        <Image 
+                          src={artist.avatarUrl} 
+                          alt={artist.name} 
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-muted">
+                           <UserIcon className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="font-medium">{artist.name}</TableCell>
