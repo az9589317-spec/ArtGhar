@@ -17,7 +17,7 @@ type LocalArtist = {
 };
 
 // This is a temporary type that matches the local data structure before it's seeded.
-// The main `Product` type in `types.ts` uses `imageUrl`.
+// The main `Product` type in `types.ts` uses `imageUrls`.
 type LocalProduct = {
   id: string;
   name: string;
@@ -148,17 +148,17 @@ const products: LocalProduct[] = [
 ];
 
 export function getProducts() {
-  return products.map(p => ({ ...p, imageUrl: p.images[0]?.url || '' }));
+  return products.map(p => ({ ...p, imageUrls: p.images.map(i => i.url) }));
 }
 
 export function getProductBySlug(slug: string) {
   const product = products.find(p => p.slug === slug);
-  return product ? { ...product, imageUrl: product.images[0]?.url || '' } : undefined;
+  return product ? { ...product, imageUrls: product.images.map(i => i.url) } : undefined;
 }
 
 export function getProductsByArtist(artistId: string) {
     const artistProducts = products.filter(p => p.artistId === artistId);
-    return artistProducts.map(p => ({ ...p, imageUrl: p.images[0]?.url || '' }));
+    return artistProducts.map(p => ({ ...p, imageUrls: p.images.map(i => i.url) }));
 }
 
 export function getArtists(): LocalArtist[] {

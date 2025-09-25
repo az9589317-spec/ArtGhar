@@ -137,10 +137,10 @@ export default function AdminSliderPage() {
                                     );
                               }}
                             />
-                             {product.imageUrl && (
+                             {product.imageUrls && product.imageUrls[0] && (
                                 <div className="relative h-16 w-16 rounded-md overflow-hidden border">
                                     <Image 
-                                        src={product.imageUrl}
+                                        src={product.imageUrls[0]}
                                         alt={product.name}
                                         fill
                                         className="object-cover"
