@@ -51,8 +51,14 @@ export default function ProductPage() {
     );
   }
 
-  if (!product) {
+  if (!isProductLoading && !product) {
     notFound();
+  }
+
+  // This check is necessary because product can be null here, even if not loading
+  if (!product) {
+    // You can return a more specific "product not found" component here if you wish
+    return <p>Product not found.</p>;
   }
 
 
@@ -60,13 +66,15 @@ export default function ProductPage() {
     <div className="container mx-auto px-4 py-12 md:py-20">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
         <div className="aspect-square relative w-full overflow-hidden rounded-lg shadow-lg">
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
+          {product.imageUrl && (
+            <Image
+              src={product.imageUrl}
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          )}
         </div>
         <div className="flex flex-col justify-center">
           <h1 className="text-3xl md:text-4xl font-headline font-bold">{product.name}</h1>
