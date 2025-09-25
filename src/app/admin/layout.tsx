@@ -10,6 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarInset,
 } from "@/components/ui/sidebar"
 import {
   LayoutDashboard,
@@ -143,17 +144,17 @@ export default function AdminLayout({
             {/* User profile section can go here */}
           </SidebarFooter>
         </Sidebar>
-        <div className="flex flex-col flex-1">
-          <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-6 sticky top-0 bg-background z-10">
-            <SidebarTrigger className="md:hidden" />
-            <div className="flex-1">
-                <h1 className="text-xl font-semibold">Admin Dashboard</h1>
-            </div>
-          </header>
-          <main className="flex-1 p-6 overflow-auto">
-            {children}
-          </main>
-        </div>
+        <SidebarInset>
+            <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-6 sticky top-0 bg-background z-10">
+                <SidebarTrigger className="md:hidden" />
+                <div className="flex-1">
+                    <h1 className="text-xl font-semibold">Admin Dashboard</h1>
+                </div>
+            </header>
+            <main className="flex-1 p-6 overflow-auto">
+                {children}
+            </main>
+        </SidebarInset>
       </div>
     </SidebarProvider>
   )
