@@ -255,7 +255,7 @@ export default function AddProductPage() {
                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 mb-4">
                             {fields.map((field, index) => (
                                 <div key={field.id} className="relative aspect-square">
-                                    <Image src={field.value} alt={`Product image ${index + 1}`} fill className="object-cover rounded-md border" />
+                                    {field.value && <Image src={field.value} alt={`Product image ${index + 1}`} fill className="object-cover rounded-md border" />}
                                     <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={() => remove(index)}>
                                         <X className="h-4 w-4" />
                                     </Button>
