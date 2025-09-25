@@ -113,7 +113,7 @@ export default function AdminLayout({
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
+               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
                   isActive={pathname.startsWith("/admin/social")}
@@ -146,7 +146,9 @@ export default function AdminLayout({
         <div className="flex flex-col flex-1">
           <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-6 sticky top-0 bg-background z-10">
             <SidebarTrigger className="md:hidden" />
-            <h1 className="text-xl font-semibold">Admin Dashboard</h1>
+            <div className="flex-1">
+                <h1 className="text-xl font-semibold">Admin Dashboard</h1>
+            </div>
           </header>
           <main className="flex-1 p-6 overflow-auto">
             {children}
