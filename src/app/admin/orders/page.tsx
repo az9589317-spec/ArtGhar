@@ -1,132 +1,18 @@
+'use client';
 
-"use client"
-
-import { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import React, { useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { getProducts } from "@/lib/data";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, doc, updateDoc } from "firebase/firestore";
+import type { Order, OrderStatus } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
-const products = getProducts();
-
-type OrderStatus = "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
-
-type ProductInOrder = {
-  id: string;
-  name: string;
-  image: string;
-  quantity: number;
-  price: number;
-}
-
-type ShippingAddress = {
-  name: string;
-  email: string;
-  address: string;
-  city: string;
-  zip: string;
-}
-
-type Order = {
-  id: string;
-  customer: string;
-  date: string;
-  total: number;
-  status: OrderStatus;
-  shippingAddress: ShippingAddress;
-  products: ProductInOrder[];
-};
-
-export const initialOrders: Order[] = [
-  { 
-    id: 'ORD001', 
-    customer: 'Jane Doe', 
-    date: '2024-08-25', 
-    total: 125.00, 
-    status: 'Processing',
-    shippingAddress: {
-      name: "Jane Doe",
-      email: "jane.doe@example.com",
-      address: "123 Art Lane",
-      city: "Creativity City",
-      zip: "54321"
-    },
-    products: [
-      { id: products[0].id, name: products[0].name, image: products[0].images[0].url, quantity: 1, price: products[0].price },
-      { id: products[4].id, name: products[4].name, image: products[4].images[0].url, quantity: 1, price: products[4].price }
-    ]
-  },
-  { 
-    id: 'ORD002', 
-    customer: 'John Smith', 
-    date: '2024-08-24', 
-    total: 75.50, 
-    status: 'Shipped',
-    shippingAddress: {
-      name: "John Smith",
-      email: "john.smith@example.com",
-      address: "456 Craft Ave",
-      city: "Maker Town",
-      zip: "98765"
-    },
-    products: [
-      { id: products[2].id, name: products[2].name, image: products[2].images[0].url, quantity: 1, price: products[2].price }
-    ]
-  },
-  { 
-    id: 'ORD003', 
-    customer: 'Peter Jones', 
-    date: '2024-08-23', 
-    total: 250.00, 
-    status: 'Pending',
-    shippingAddress: {
-      name: "Peter Jones",
-      email: "peter.jones@example.com",
-      address: "789 Design Blvd",
-      city: "Studio City",
-      zip: "13579"
-    },
-    products: [
-      { id: products[1].id, name: products[1].name, image: products[1].images[0].url, quantity: 1, price: 350.00 },
-    ]
-  },
-  { 
-    id: 'ORD004', 
-    customer: 'Mary Johnson', 
-    date: '2024-08-22', 
-    total: 45.00, 
-    status: 'Delivered',
-    shippingAddress: {
-      name: "Mary Johnson",
-      email: "mary.j@example.com",
-      address: "101 Gallery Rd",
-      city: "Artville",
-      zip: "24680"
-    },
-    products: [
-      { id: products[6].id, name: products[6].name, image: products[6].images[0].url, quantity: 1, price: products[6].price },
-    ]
-  },
-  { 
-    id: 'ORD005', 
-    customer: 'Chris Lee', 
-    date: '2024-08-21', 
-    total: 99.99, 
-    status: 'Cancelled',
-    shippingAddress: {
-      name: "Chris Lee",
-      email: "chris.lee@example.com",
-      address: "222 Pottery Path",
-      city: "Clayton",
-      zip: "11223"
-    },
-    products: [
-      { id: products[7].id, name: products[7].name, image: products[7].images[0].url, quantity: 1, price: products[7].price }
-    ]
-  },
-];
 
 const statusVariantMap: Record<OrderStatus, "default" | "secondary" | "destructive" | "outline"> = {
     Pending: "secondary",
@@ -146,14 +32,33 @@ const statusColorMap: Record<OrderStatus, string> = {
 
 
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const firestore = useFirestore();
+  const { toast } = useToast();
+  
+  const ordersQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'orders');
+  }, [firestore]);
 
-  const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
-    setOrders(prevOrders => 
-      prevOrders.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
+  const { data: orders, isLoading } = useCollection<Order>(ordersQuery);
+
+  const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
+    if (!firestore) return;
+    const orderRef = doc(firestore, 'orders', orderId);
+    try {
+      await updateDoc(orderRef, { status: newStatus });
+       toast({
+        title: "Status Updated",
+        description: `Order ${orderId} is now ${newStatus}.`,
+      });
+    } catch (error) {
+      console.error("Error updating status:", error);
+       toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not update order status.",
+      });
+    }
   };
 
   return (
@@ -163,7 +68,7 @@ export default function AdminOrdersPage() {
           <CardTitle>All Orders</CardTitle>
         </CardHeader>
         <CardContent>
-          {orders.length > 0 ? (
+          {(isLoading || (orders && orders.length > 0)) ? (
             <>
               {/* Desktop Table View */}
               <div className="hidden md:block">
@@ -178,15 +83,24 @@ export default function AdminOrdersPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {orders.map((order) => (
+                    {isLoading && Array.from({length: 5}).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-6 w-32" /></TableCell>
+                        <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-9 w-[140px]" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-6 w-16 ml-auto" /></TableCell>
+                      </TableRow>
+                    ))}
+                    {!isLoading && orders?.map((order) => (
                       <TableRow key={order.id}>
                         <TableCell className="font-medium">
                           <Link href={`/admin/orders/${order.id}`} className="text-primary hover:underline">
-                            {order.id}
+                            {order.id.substring(0, 7).toUpperCase()}...
                           </Link>
                         </TableCell>
-                        <TableCell>{order.customer}</TableCell>
-                        <TableCell>{order.date}</TableCell>
+                        <TableCell>{order.shippingAddress.firstName} {order.shippingAddress.lastName}</TableCell>
+                        <TableCell>{format(order.createdAt.toDate(), "MMM d, yyyy")}</TableCell>
                         <TableCell>
                            <Select
                             value={order.status}
@@ -216,19 +130,26 @@ export default function AdminOrdersPage() {
 
               {/* Mobile Card View */}
               <div className="md:hidden space-y-4">
-                {orders.map((order) => (
+                 {isLoading && Array.from({length: 5}).map((_, i) => (
+                    <Card key={i} className="w-full">
+                       <CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader>
+                       <CardContent><Skeleton className="h-4 w-1/2" /></CardContent>
+                       <CardFooter><Skeleton className="h-8 w-1/4" /></CardFooter>
+                    </Card>
+                 ))}
+                {!isLoading && orders?.map((order) => (
                     <Link key={order.id} href={`/admin/orders/${order.id}`} className="block">
                     <Card className="w-full hover:bg-muted/50 transition-colors">
                         <CardHeader>
                             <div className="flex justify-between items-center">
-                                <CardTitle className="text-lg">{order.id}</CardTitle>
+                                <CardTitle className="text-lg">Order #{order.id.substring(0, 7).toUpperCase()}</CardTitle>
                                 <Badge variant={statusVariantMap[order.status]}>{order.status}</Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground">{order.date}</p>
+                            <p className="text-sm text-muted-foreground">{format(order.createdAt.toDate(), "PP")}</p>
                         </CardHeader>
                         <CardContent className="space-y-2">
                              <div>
-                                <p className="font-medium">{order.customer}</p>
+                                <p className="font-medium">{order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
                                 <p className="text-sm text-muted-foreground">Customer</p>
                             </div>
                         </CardContent>

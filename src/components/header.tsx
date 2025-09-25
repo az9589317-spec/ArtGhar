@@ -1,7 +1,6 @@
-
 'use client';
 import Link from 'next/link';
-import { Search, ShoppingBag, Menu, LogOut, User } from 'lucide-react';
+import { Search, ShoppingBag, Menu, LogOut, User, Package } from 'lucide-react';
 import { Logo } from '@/components/logo';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -101,6 +100,12 @@ export default function Header() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                   <DropdownMenuItem asChild>
+                      <Link href="/my-orders">
+                        <Package className="mr-2 h-4 w-4" />
+                        <span>My Orders</span>
+                      </Link>
+                    </DropdownMenuItem>
                   <DropdownMenuItem onClick={signOut}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
@@ -161,4 +166,3 @@ export default function Header() {
     </header>
   );
 }
-
