@@ -45,7 +45,7 @@ export default function AdminLayout({
             </SidebarHeader>
             <SidebarContent>
               <ScrollArea className="h-full">
-                <SidebarMenu>
+                <SidebarMenu className="pt-8">
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
