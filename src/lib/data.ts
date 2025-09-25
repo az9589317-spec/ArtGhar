@@ -62,6 +62,9 @@ const categories: Category[] = [
     { id: '4', name: 'Textiles', slug: 'textiles' },
     { id: '5', name: 'Home Goods', slug: 'home-goods' },
     { id: '6', name: 'Prints', slug: 'prints' },
+    { id: '7', name: 'Bouquet', slug: 'bouquet' },
+    { id: '8', name: 'Sculpture', slug: 'sculpture' },
+    { id: '9', name: 'Glass Art', slug: 'glass-art' },
 ]
 
 const products: LocalProduct[] = [
