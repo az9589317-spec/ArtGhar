@@ -11,6 +11,7 @@ import { useDoc, useFirestore, useCollection, useMemoFirebase } from '@/firebase
 import { doc, collection, query, where, limit } from 'firebase/firestore';
 import type { Artist, Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import ProductCard from '@/components/product-card';
 
 
 export default function ProductPage() {
@@ -33,6 +34,21 @@ export default function ProductPage() {
   }, [firestore, product]);
   
   const { data: artist, isLoading: isArtistLoading } = useDoc<Artist>(artistRef);
+
+  const relatedProductsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    // Fetch a few other products, limit to 5 to get 4 plus the current one potentially
+    return query(collection(firestore, 'products'), limit(5));
+  }, [firestore]);
+
+  const { data: relatedProducts, isLoading: areRelatedProductsLoading } = useCollection<Product>(relatedProductsQuery);
+
+  // Filter out the current product from the related list
+  const filteredRelatedProducts = React.useMemo(() => {
+    if (!relatedProducts || !product) return [];
+    return relatedProducts.filter(p => p.id !== product.id).slice(0, 4);
+  }, [relatedProducts, product]);
+
 
   if (isProductLoading) {
     return (
@@ -93,6 +109,23 @@ export default function ProductPage() {
           </div>
         </div>
       </div>
+      
+      <div className="mt-20 md:mt-28">
+          <h2 className="text-3xl font-headline font-bold text-center mb-10">You Might Also Like</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {(areRelatedProductsLoading) && Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                    <Skeleton className="h-64 w-full" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-6 w-1/2" />
+                </div>
+            ))}
+            {!areRelatedProductsLoading && filteredRelatedProducts.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+      </div>
+
     </div>
   );
 }
