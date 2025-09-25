@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -17,27 +17,14 @@ export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
   const firestore = useFirestore();
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [isProductLoading, setIsProductLoading] = useState(true);
-
   const productQuery = useMemoFirebase(() => {
     if (!firestore || !slug) return null;
     return query(collection(firestore, 'products'), where('slug', '==', slug), limit(1));
   }, [firestore, slug]);
   
-  const { data: products, isLoading: isQueryLoading } = useCollection<Product>(productQuery);
+  const { data: products, isLoading: isProductLoading } = useCollection<Product>(productQuery);
   
-  useEffect(() => {
-    if (!isQueryLoading) {
-        if (products && products.length > 0) {
-            setProduct(products[0]);
-        } else {
-            setProduct(null);
-        }
-        setIsProductLoading(false);
-    }
-  }, [products, isQueryLoading]);
-
+  const product = products?.[0];
 
   const artistRef = useMemoFirebase(() => {
     if (!firestore || !product?.artistId) return null;
