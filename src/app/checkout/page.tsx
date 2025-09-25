@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -25,6 +26,7 @@ const shippingFormSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
+  phone: z.string().min(10, "A valid 10-digit phone number is required."),
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
   zip: z.string().min(1, "ZIP code is required"),
@@ -50,6 +52,7 @@ export default function CheckoutPage() {
       firstName: "",
       lastName: "",
       email: user?.email || "",
+      phone: "",
       address: "",
       city: "",
       zip: "",
@@ -157,6 +160,7 @@ export default function CheckoutPage() {
         prefill: {
             name: `${shippingDetails.firstName} ${shippingDetails.lastName}`,
             email: shippingDetails.email,
+            contact: shippingDetails.phone,
         },
         theme: {
             color: "#F56565"
@@ -207,6 +211,9 @@ export default function CheckoutPage() {
                 </div>
                  <FormField control={form.control} name="email" render={({ field }) => (
                     <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
+                )} />
+                 <FormField control={form.control} name="phone" render={({ field }) => (
+                    <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
                 )} />
                  <FormField control={form.control} name="address" render={({ field }) => (
                     <FormItem><FormLabel>Address</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
