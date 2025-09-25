@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -30,12 +31,13 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { toast } = useToast();
 
   const handleAddToCart = () => {
-    if (product.imageUrl) {
+    const imageUrl = product.imageUrls?.[0];
+    if (imageUrl) {
         addItem({
           id: product.id,
           name: product.name,
           price: product.price,
-          image: product.imageUrl,
+          image: imageUrl,
           slug: product.slug,
         });
         toast({
@@ -56,9 +58,9 @@ export default function ProductCard({ product }: ProductCardProps) {
       <CardHeader className="p-0 border-b">
         <Link href={`/products/${product.slug}`} className="block">
           <div className="aspect-square relative overflow-hidden">
-            {product.imageUrl ? (
+            {product.imageUrls && product.imageUrls.length > 0 ? (
                 <Image
-                    src={product.imageUrl}
+                    src={product.imageUrls[0]}
                     alt={product.name}
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-105"

@@ -10,11 +10,11 @@
         "slug": { "type": "string", "description": "URL-friendly slug for the product." },
         "description": { "type": "string", "description": "Detailed description of the product." },
         "price": { "type": "number", "description": "Price of the product." },
-        "imageUrl": { "type": "string", "description": "URL of the product's image.", "format": "uri" },
+        "imageUrls": { "type": "array", "items": { "type": "string", "format": "uri" }, "description": "URLs of the product's images." },
         "categoryId": { "type": "string", "description": "ID of the category this product belongs to." },
         "artistId": { "type": "string", "description": "ID of the artist who created the product." }
       },
-      "required": ["name", "slug", "description", "price", "imageUrl", "categoryId", "artistId"]
+      "required": ["name", "slug", "description", "price", "categoryId", "artistId"]
     },
     "Category": {
       "title": "Category",

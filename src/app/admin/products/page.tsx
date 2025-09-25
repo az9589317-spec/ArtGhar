@@ -10,7 +10,7 @@ import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, deleteDoc, doc } from "firebase/firestore";
 import type { Product, Category } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Image as ImageIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -127,17 +127,19 @@ export default function AdminProductsPage() {
               {!isLoading && products?.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell className="hidden sm:table-cell">
-                    {product.imageUrl ? (
+                    {product.imageUrls && product.imageUrls.length > 0 ? (
                       <div className="relative h-16 w-16 rounded-md overflow-hidden border">
                         <Image
                           alt={product.name}
                           className="object-cover"
-                          src={product.imageUrl}
+                          src={product.imageUrls[0]}
                           fill
                         />
                       </div>
                     ) : (
-                      <div className="flex h-16 w-16 items-center justify-center rounded-md border bg-muted" />
+                      <div className="flex h-16 w-16 items-center justify-center rounded-md border bg-muted">
+                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                      </div>
                     )}
                   </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>

@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useForm } from "react-hook-form"
+import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useRouter, useParams, notFound } from "next/navigation"
@@ -33,7 +33,7 @@ import { useCollection, useDoc, useFirestore, useMemoFirebase, errorEmitter, Fir
 import { collection, doc, updateDoc } from "firebase/firestore"
 import type { Artist, Category, Product } from "@/lib/types"
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2, UploadCloud } from "lucide-react"
+import { Loader2, UploadCloud, X } from "lucide-react"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -51,7 +51,7 @@ const formSchema = z.object({
   categoryId: z.string({
     required_error: "Please select a category.",
   }),
-  imageUrl: z.string().url({ message: "Please upload an image." }),
+  imageUrls: z.array(z.string().url()).min(1, { message: "Please upload at least one image." }),
 });
 
 export default function EditProductPage() {
@@ -61,7 +61,6 @@ export default function EditProductPage() {
   const { toast } = useToast()
   const firestore = useFirestore()
   const [isUploading, setIsUploading] = useState(false)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
   
   const productRef = useMemoFirebase(() => (firestore && typeof id === 'string') ? doc(firestore, 'products', id) : null, [firestore, id]);
   const { data: product, isLoading: isProductLoading } = useDoc<Product>(productRef);
@@ -78,16 +77,23 @@ export default function EditProductPage() {
         name: "",
         description: "",
         price: 0,
-        imageUrl: "",
+        imageUrls: [],
     },
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "imageUrls"
+  });
+
+
   useEffect(() => {
     if (product) {
-      form.reset(product);
-      if (product.imageUrl) {
-        setImagePreview(product.imageUrl);
-      }
+        const values = {
+            ...product,
+            imageUrls: product.imageUrls || [],
+        }
+      form.reset(values);
     }
   }, [product, form]);
 
@@ -96,7 +102,6 @@ export default function EditProductPage() {
     if (!file) return;
 
     setIsUploading(true)
-    setImagePreview(URL.createObjectURL(file))
 
     const formData = new FormData()
     formData.append("source", file)
@@ -109,9 +114,9 @@ export default function EditProductPage() {
 
       const result = await response.json()
 
-      if (response.ok) {
-        form.setValue("imageUrl", result.image.url, { shouldValidate: true })
-        toast({ title: "Image Uploaded", description: "Your new image is ready." })
+      if (response.ok && result.image?.url) {
+        append(result.image.url);
+        toast({ title: "Image Uploaded", description: "Your new image has been added." })
       } else {
         throw new Error(result.error?.message || "Unknown error occurred")
       }
@@ -122,11 +127,9 @@ export default function EditProductPage() {
         title: "Upload Failed",
         description: error.message || "There was a problem uploading the image.",
       });
-      // Revert to original image if upload fails
-      setImagePreview(product?.imageUrl || null);
-      form.setValue("imageUrl", product?.imageUrl || "", { shouldValidate: true });
     } finally {
       setIsUploading(false)
+      event.target.value = "";
     }
   }
 
@@ -300,27 +303,34 @@ export default function EditProductPage() {
 
             <FormField
               control={form.control}
-              name="imageUrl"
-              render={({ field }) => (
+              name="imageUrls"
+              render={() => (
                 <FormItem>
-                  <FormLabel>Product Image</FormLabel>
-                  <FormControl>
+                  <FormLabel>Product Images</FormLabel>
+                   <FormControl>
                     <div>
-                      <label htmlFor="image-upload" className="cursor-pointer">
-                        <div className="relative flex justify-center items-center h-48 w-full rounded-md border-2 border-dashed border-input bg-background hover:bg-accent text-muted-foreground">
-                          {isUploading ? (
-                            <Loader2 className="h-8 w-8 animate-spin" />
-                          ) : imagePreview ? (
-                            <Image src={imagePreview} alt="Image preview" fill className="object-contain rounded-md p-2" />
-                          ) : (
-                            <div className="text-center">
-                              <UploadCloud className="mx-auto h-8 w-8" />
-                              <p>Click to upload an image</p>
-                              <p className="text-xs">PNG, JPG, GIF up to 10MB</p>
-                            </div>
-                          )}
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 mb-4">
+                            {fields.map((field, index) => (
+                                <div key={field.id} className="relative aspect-square">
+                                    <Image src={field.value} alt={`Product image ${index + 1}`} fill className="object-cover rounded-md border" />
+                                    <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={() => remove(index)}>
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))}
+                             <label htmlFor="image-upload" className="cursor-pointer">
+                                <div className="relative flex justify-center items-center aspect-square w-full rounded-md border-2 border-dashed border-input bg-background hover:bg-accent text-muted-foreground">
+                                {isUploading ? (
+                                    <Loader2 className="h-8 w-8 animate-spin" />
+                                ) : (
+                                    <div className="text-center">
+                                    <UploadCloud className="mx-auto h-8 w-8" />
+                                    <p className="text-xs mt-1">Upload</p>
+                                    </div>
+                                )}
+                                </div>
+                              </label>
                         </div>
-                      </label>
                       <Input
                         id="image-upload"
                         type="file"
@@ -335,7 +345,7 @@ export default function EditProductPage() {
                 </FormItem>
               )}
             />
-
+            
             <Button type="submit">Save Changes</Button>
           </form>
         </Form>

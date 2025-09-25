@@ -9,7 +9,7 @@ export type Product = {
   price: number;
   artistId: string;
   categoryId: string;
-  imageUrl?: string;
+  imageUrls?: string[];
 };
 
 export type Artist = {

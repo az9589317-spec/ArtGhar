@@ -1,3 +1,4 @@
+
 'use client'
 
 import { Button } from "@/components/ui/button"
@@ -11,11 +12,21 @@ export function AddToCartButton({ product }: { product: Product }) {
   const { toast } = useToast();
 
   const handleAddToCart = () => {
+    const imageUrl = product.imageUrls?.[0];
+    if (!imageUrl) {
+        toast({
+            variant: "destructive",
+            title: "Cannot Add to Cart",
+            description: "This product is missing images.",
+        });
+        return;
+    }
+
     addItem({
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.imageUrl,
+      image: imageUrl,
       slug: product.slug,
     });
     toast({

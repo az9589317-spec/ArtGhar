@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useForm } from "react-hook-form"
+import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
@@ -32,7 +32,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from "@/firebase"
 import { collection, addDoc } from "firebase/firestore"
 import type { Artist, Category } from "@/lib/types"
-import { Loader2, UploadCloud } from "lucide-react"
+import { Loader2, UploadCloud, X } from "lucide-react"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -50,7 +50,7 @@ const formSchema = z.object({
   categoryId: z.string({
     required_error: "Please select a category.",
   }),
-  imageUrl: z.string().url({ message: "Please upload an image." }),
+  imageUrls: z.array(z.string().url()).min(1, { message: "Please upload at least one image." }),
 });
 
 export default function AddProductPage() {
@@ -58,7 +58,6 @@ export default function AddProductPage() {
   const { toast } = useToast()
   const firestore = useFirestore()
   const [isUploading, setIsUploading] = useState(false)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
   
   const artistsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'artists') : null, [firestore]);
   const categoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
@@ -72,16 +71,20 @@ export default function AddProductPage() {
       name: "",
       description: "",
       price: 0,
-      imageUrl: "",
+      imageUrls: [],
     },
   })
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "imageUrls"
+  });
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return;
 
     setIsUploading(true)
-    setImagePreview(URL.createObjectURL(file))
 
     const formData = new FormData()
     formData.append("source", file)
@@ -94,11 +97,11 @@ export default function AddProductPage() {
 
       const result = await response.json()
 
-      if (response.ok) {
-        form.setValue("imageUrl", result.imageUrl, { shouldValidate: true })
-        toast({ title: "Image Uploaded", description: "Your image is ready." })
+      if (response.ok && result.image?.url) {
+        append(result.image.url);
+        toast({ title: "Image Uploaded", description: "Your image has been added." })
       } else {
-        throw new Error(result.error || "Unknown error occurred")
+        throw new Error(result.error?.message || "Unknown error occurred")
       }
     } catch (error: any) {
       console.error("Error uploading image:", error);
@@ -107,10 +110,10 @@ export default function AddProductPage() {
         title: "Upload Failed",
         description: error.message || "There was a problem uploading the image.",
       });
-      setImagePreview(null);
-      form.setValue("imageUrl", "", { shouldValidate: true });
     } finally {
       setIsUploading(false)
+       // Reset file input
+      event.target.value = "";
     }
   }
 
@@ -243,27 +246,34 @@ export default function AddProductPage() {
 
             <FormField
               control={form.control}
-              name="imageUrl"
-              render={({ field }) => (
+              name="imageUrls"
+              render={() => (
                 <FormItem>
-                  <FormLabel>Product Image</FormLabel>
+                  <FormLabel>Product Images</FormLabel>
                   <FormControl>
                     <div>
-                      <label htmlFor="image-upload" className="cursor-pointer">
-                        <div className="relative flex justify-center items-center h-48 w-full rounded-md border-2 border-dashed border-input bg-background hover:bg-accent text-muted-foreground">
-                          {isUploading ? (
-                            <Loader2 className="h-8 w-8 animate-spin" />
-                          ) : imagePreview ? (
-                            <Image src={imagePreview} alt="Image preview" fill className="object-contain rounded-md p-2" />
-                          ) : (
-                            <div className="text-center">
-                              <UploadCloud className="mx-auto h-8 w-8" />
-                              <p>Click to upload an image</p>
-                              <p className="text-xs">PNG, JPG, GIF up to 10MB</p>
-                            </div>
-                          )}
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 mb-4">
+                            {fields.map((field, index) => (
+                                <div key={field.id} className="relative aspect-square">
+                                    <Image src={field.value} alt={`Product image ${index + 1}`} fill className="object-cover rounded-md border" />
+                                    <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={() => remove(index)}>
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))}
+                             <label htmlFor="image-upload" className="cursor-pointer">
+                                <div className="relative flex justify-center items-center aspect-square w-full rounded-md border-2 border-dashed border-input bg-background hover:bg-accent text-muted-foreground">
+                                {isUploading ? (
+                                    <Loader2 className="h-8 w-8 animate-spin" />
+                                ) : (
+                                    <div className="text-center">
+                                    <UploadCloud className="mx-auto h-8 w-8" />
+                                    <p className="text-xs mt-1">Upload</p>
+                                    </div>
+                                )}
+                                </div>
+                              </label>
                         </div>
-                      </label>
                       <Input
                         id="image-upload"
                         type="file"

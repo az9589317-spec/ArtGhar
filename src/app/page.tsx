@@ -32,7 +32,7 @@ export default function Home() {
     Autoplay({ delay: 4000, stopOnInteraction: true })
   )
 
-  const heroProducts = products?.filter(p => p.imageUrl).slice(0, 3) || [];
+  const heroProducts = products?.filter(p => p.imageUrls && p.imageUrls.length > 0).slice(0, 3) || [];
 
   return (
     <div className="flex flex-col">
@@ -52,9 +52,9 @@ export default function Home() {
               {heroProducts.map((product) => (
                 <CarouselItem key={product.id}>
                   <div className="relative w-full h-[60vh] md:h-[70vh]">
-                    {product.imageUrl && (
+                    {product.imageUrls && product.imageUrls[0] && (
                         <Image
-                            src={product.imageUrl}
+                            src={product.imageUrls[0]}
                             alt={product.name}
                             fill
                             className="object-cover"

@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -12,11 +12,13 @@ import { doc, collection, query, where, limit } from 'firebase/firestore';
 import type { Artist, Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProductCard from '@/components/product-card';
+import { cn } from '@/lib/utils';
 
 
 export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
   const firestore = useFirestore();
+  const [primaryImage, setPrimaryImage] = useState<string | null>(null);
 
   const productQuery = useMemoFirebase(() => {
     if (!firestore || !slug) return null;
@@ -26,6 +28,12 @@ export default function ProductPage() {
   const { data: products, isLoading: isProductLoading } = useCollection<Product>(productQuery);
   
   const product = products?.[0];
+
+  React.useEffect(() => {
+    if (product?.imageUrls && product.imageUrls.length > 0) {
+      setPrimaryImage(product.imageUrls[0]);
+    }
+  }, [product]);
 
   const artistRef = useMemoFirebase(() => {
     // Only create the ref if the product has been loaded
@@ -54,7 +62,12 @@ export default function ProductPage() {
     return (
         <div className="container mx-auto px-4 py-12 md:py-20">
             <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
-                <Skeleton className="aspect-square w-full rounded-lg" />
+                <div className="space-y-4">
+                    <Skeleton className="aspect-square w-full rounded-lg" />
+                    <div className="grid grid-cols-5 gap-4">
+                        {Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="aspect-square w-full rounded-lg" />)}
+                    </div>
+                </div>
                 <div className="flex flex-col justify-center space-y-4">
                     <Skeleton className="h-10 w-3/4" />
                     <Skeleton className="h-6 w-1/4" />
@@ -79,16 +92,26 @@ export default function ProductPage() {
   return (
     <div className="container mx-auto px-4 py-12 md:py-20">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
-        <div className="aspect-square relative w-full overflow-hidden rounded-lg shadow-lg">
-          {product.imageUrl && (
-            <Image
-              src={product.imageUrl}
-              alt={product.name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-          )}
+        <div>
+            <div className="aspect-square relative w-full overflow-hidden rounded-lg shadow-lg mb-4">
+            {primaryImage && (
+                <Image
+                src={primaryImage}
+                alt={product.name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+                />
+            )}
+            </div>
+            <div className="grid grid-cols-5 gap-4">
+                {product.imageUrls?.map(url => (
+                    <button key={url} onClick={() => setPrimaryImage(url)} className={cn("relative aspect-square w-full overflow-hidden rounded-md border-2 transition-all", primaryImage === url ? "border-primary" : "border-transparent hover:border-muted-foreground")}>
+                        <Image src={url} alt="Product thumbnail" fill className="object-cover" />
+                    </button>
+                ))}
+            </div>
         </div>
         <div className="flex flex-col justify-center">
           <h1 className="text-3xl md:text-4xl font-headline font-bold">{product.name}</h1>
