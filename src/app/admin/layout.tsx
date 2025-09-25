@@ -4,7 +4,6 @@ import {
   SidebarProvider,
   Sidebar,
   SidebarTrigger,
-  SidebarInset,
   SidebarHeader,
   SidebarFooter,
   SidebarContent,
@@ -144,12 +143,12 @@ export default function AdminLayout({
             {/* User profile section can go here */}
           </SidebarFooter>
         </Sidebar>
-        <div className="flex flex-col flex-1">
-          <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-6">
-            <SidebarTrigger />
+        <div className="flex flex-col flex-1 overflow-auto">
+          <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-6 sticky top-0 bg-background z-10">
+            <SidebarTrigger className="md:hidden" />
             <h1 className="text-xl font-semibold">Admin Dashboard</h1>
           </header>
-          <main className="flex-1 overflow-auto p-6">
+          <main className="flex-1 p-6">
             {children}
           </main>
         </div>
