@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
 import ProductCard from '@/components/product-card';
@@ -13,18 +13,28 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function ArtistPage() {
     const { id } = useParams<{ id: string }>();
     const firestore = useFirestore();
+    const [artist, setArtist] = useState<Artist | null>(null);
+    const [isArtistLoading, setIsArtistLoading] = useState(true);
 
     const artistRef = useMemoFirebase(() => {
         if (!firestore || !id) return null;
         return doc(firestore, 'artists', id);
     }, [firestore, id]);
+    
+    const { data: artistData, isLoading: isArtistDocLoading } = useDoc<Artist>(artistRef);
+
+    useEffect(() => {
+        if (!isArtistDocLoading) {
+            setArtist(artistData);
+            setIsArtistLoading(false);
+        }
+    }, [artistData, isArtistDocLoading]);
 
     const productsQuery = useMemoFirebase(() => {
         if (!firestore || !id) return null;
         return query(collection(firestore, 'products'), where('artistId', '==', id));
     }, [firestore, id]);
 
-    const { data: artist, isLoading: isArtistLoading } = useDoc<Artist>(artistRef);
     const { data: products, isLoading: areProductsLoading } = useCollection<Product>(productsQuery);
 
   if (isArtistLoading) {
