@@ -138,6 +138,19 @@ export default function CheckoutPage() {
             
             try {
                 const docRef = await addDoc(collection(firestore, 'orders'), orderData);
+                
+                // 5. Send notification email
+                try {
+                  await fetch('/api/send-order-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId: docRef.id, ...orderData }),
+                  });
+                } catch (emailError) {
+                  console.error("Failed to send order notification email:", emailError);
+                  // Don't block the user flow for this, just log it.
+                }
+
                 toast({
                     title: "Order Placed!",
                     description: "Thank you for your purchase. Your art is on its way!",
@@ -213,7 +226,7 @@ export default function CheckoutPage() {
                     <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
                 )} />
                  <FormField control={form.control} name="phone" render={({ field }) => (
-                    <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} disabled={isProcessing} /></FormControl><FormMessage /></Form-Item>
                 )} />
                  <FormField control={form.control} name="address" render={({ field }) => (
                     <FormItem><FormLabel>Address</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
@@ -223,7 +236,7 @@ export default function CheckoutPage() {
                         <FormItem className="col-span-2"><FormLabel>City</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="zip" render={({ field }) => (
-                        <FormItem><FormLabel>ZIP Code</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>ZIP Code</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></Form-Item>
                     )} />
                 </div>
               </CardContent>
@@ -276,3 +289,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+    

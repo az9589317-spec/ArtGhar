@@ -56,8 +56,9 @@ export type ShippingAddress = {
 
 export type Order = {
   id: string;
+  orderId?: string; // Add this to match the structure we send to the API
   userId: string;
-  createdAt: Timestamp;
+  createdAt: Timestamp | any;
   status: OrderStatus;
   products: ProductInOrder[];
   shippingAddress: ShippingAddress;
@@ -70,3 +71,5 @@ export type Order = {
     paymentId: string;
   }
 };
+
+    
