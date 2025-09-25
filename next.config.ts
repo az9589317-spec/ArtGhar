@@ -29,8 +29,8 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
-        hostname: 'iili.io',
+        protocol: 'http',
+        hostname: 'freeimage.host',
         port: '',
         pathname: '/**',
       },
