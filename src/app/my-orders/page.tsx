@@ -1,6 +1,8 @@
+
 'use client';
 
 import React from "react";
+import Image from "next/image";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -85,7 +87,10 @@ export default function MyOrdersPage() {
                  {isLoading && Array.from({length: 3}).map((_, i) => (
                     <Card key={i} className="w-full rounded-none border-x-0 border-t-0">
                        <CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader>
-                       <CardContent><Skeleton className="h-4 w-1/2" /></CardContent>
+                       <CardContent className="space-y-4">
+                            <Skeleton className="h-16 w-full" />
+                            <Skeleton className="h-4 w-1/2" />
+                       </CardContent>
                        <CardFooter><Skeleton className="h-8 w-1/4" /></CardFooter>
                     </Card>
                  ))}
@@ -99,8 +104,25 @@ export default function MyOrdersPage() {
                             </div>
                             <p className="text-sm text-muted-foreground">{format(order.createdAt.toDate(), "PP")}</p>
                         </CardHeader>
-                        <CardFooter className="pb-4">
-                            <p className="font-bold text-lg">₹{order.total.toFixed(2)}</p>
+                        <CardContent className="space-y-4 pb-4">
+                            <div className="flex -space-x-4">
+                                {order.products.slice(0, 3).map(p => (
+                                    <div key={p.id} className="relative h-16 w-16 rounded-full overflow-hidden border-2 border-background ring-2 ring-primary">
+                                        <Image src={p.image} alt={p.name} fill className="object-cover"/>
+                                    </div>
+                                ))}
+                            </div>
+                            <div>
+                                {order.products.map(p => (
+                                    <p key={p.id} className="text-sm text-muted-foreground truncate">{p.name}</p>
+                                ))}
+                            </div>
+                        </CardContent>
+                        <CardFooter className="pt-0 pb-4">
+                            <div className="flex justify-between items-center w-full">
+                                <p className="font-bold text-lg">₹{order.total.toFixed(2)}</p>
+                                <span className="text-sm text-primary">View Details</span>
+                            </div>
                         </CardFooter>
                     </Card>
                     </Link>
