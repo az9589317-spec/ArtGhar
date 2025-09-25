@@ -1,9 +1,11 @@
+
 'use server';
 
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-  const apiKey = process.env.FREEIMAGE_API_KEY;
+  // Hardcoding the API key to ensure it is available on the server.
+  const apiKey = "6d207e02198a847aa98d0a2a901485a5";
 
   if (!apiKey) {
     return NextResponse.json(
