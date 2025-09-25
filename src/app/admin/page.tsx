@@ -11,6 +11,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import Image from 'next/image';
+import { Badge } from "@/components/ui/badge";
+import { OrderStatus } from "@/lib/types";
+
+const statusVariantMap: Record<OrderStatus, "default" | "secondary" | "destructive" | "outline"> = {
+    Pending: "secondary",
+    Processing: "default",
+    Shipped: "outline",
+    Delivered: "default", 
+    Cancelled: "destructive",
+}
 
 export default function AdminDashboard() {
   const firestore = useFirestore();
@@ -115,40 +125,83 @@ export default function AdminDashboard() {
                     {Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
                 </div>
             ) : recentOrders && recentOrders.length > 0 ? (
-              <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Customer & Products</TableHead>
-                        <TableHead className="hidden sm:table-cell">Date</TableHead>
-                        <TableHead className="hidden sm:table-cell">Status</TableHead>
-                        <TableHead className="text-right">Total</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentOrders.map(order => (
-                    <TableRow key={order.id}>
-                        <TableCell>
-                            <div className="font-medium">{order.shippingAddress.firstName} {order.shippingAddress.lastName}</div>
-                            <div className="flex items-center gap-2 mt-1">
-                                <div className="flex -space-x-2 overflow-hidden">
-                                {order.products.slice(0, 3).map(p => (
-                                    <div key={p.id} className="relative h-6 w-6 rounded-full overflow-hidden border-2 border-background ring-1 ring-muted">
-                                        <Image src={p.image} alt={p.name} fill className="object-cover"/>
+                <>
+                {/* Desktop View */}
+                <div className="hidden sm:block">
+                  <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Customer & Products</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="text-right">Total</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {recentOrders.map(order => (
+                        <TableRow key={order.id}>
+                            <TableCell>
+                                <div className="font-medium">{order.shippingAddress.firstName} {order.shippingAddress.lastName}</div>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <div className="flex -space-x-2 overflow-hidden">
+                                    {order.products.slice(0, 3).map(p => (
+                                        <div key={p.id} className="relative h-6 w-6 rounded-full overflow-hidden border-2 border-background ring-1 ring-muted">
+                                            <Image src={p.image} alt={p.name} fill className="object-cover"/>
+                                        </div>
+                                    ))}
                                     </div>
-                                ))}
+                                    <div className="text-xs text-muted-foreground truncate">
+                                        {order.products.map(p => p.name).join(', ')}
+                                    </div>
                                 </div>
-                                <div className="text-xs text-muted-foreground truncate">
-                                    {order.products.map(p => p.name).join(', ')}
-                                </div>
-                            </div>
-                        </TableCell>
-                         <TableCell className="hidden sm:table-cell">{format(order.createdAt.toDate(), "PP")}</TableCell>
-                         <TableCell className="hidden sm:table-cell">{order.status}</TableCell>
-                         <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                            </TableCell>
+                             <TableCell>{format(order.createdAt.toDate(), "PP")}</TableCell>
+                             <TableCell>
+                               <Badge variant={statusVariantMap[order.status]} className="capitalize">{order.status}</Badge>
+                             </TableCell>
+                             <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                {/* Mobile View */}
+                <div className="sm:hidden space-y-4">
+                    {recentOrders.map(order => (
+                        <Link key={order.id} href={`/admin/orders/${order.id}`} className="block">
+                            <Card className="hover:bg-muted/50 transition-colors">
+                                <CardHeader>
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <CardTitle className="text-base font-bold">#{order.id.substring(0, 7).toUpperCase()}</CardTitle>
+                                            <p className="text-sm text-muted-foreground">{order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
+                                        </div>
+                                        <Badge variant={statusVariantMap[order.status]}>{order.status}</Badge>
+                                    </div>
+                                     <p className="text-xs text-muted-foreground pt-1">{format(order.createdAt.toDate(), "PPp")}</p>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <div className="flex -space-x-2 overflow-hidden">
+                                        {order.products.slice(0, 3).map(p => (
+                                            <div key={p.id} className="relative h-8 w-8 rounded-full overflow-hidden border-2 border-background ring-1 ring-muted">
+                                                <Image src={p.image} alt={p.name} fill className="object-cover"/>
+                                            </div>
+                                        ))}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground truncate">
+                                            {order.products.map(p => p.name).join(', ')}
+                                        </div>
+                                    </div>
+                                </CardContent>
+                                <CardContent className="pt-2 text-right">
+                                    <p className="text-lg font-bold">₹{order.total.toFixed(2)}</p>
+                                </CardContent>
+                            </Card>
+                        </Link>
+                    ))}
+                </div>
+                </>
             ) : (
               <p className="text-muted-foreground text-center py-8">No recent sales data available.</p>
             )}
