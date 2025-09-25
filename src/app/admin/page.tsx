@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import Image from 'next/image';
 import { Badge } from "@/components/ui/badge";
 import { OrderStatus } from "@/lib/types";
+import { useRouter } from "next/navigation";
 
 const statusVariantMap: Record<OrderStatus, "default" | "secondary" | "destructive" | "outline"> = {
     Pending: "secondary",
@@ -24,6 +25,7 @@ const statusVariantMap: Record<OrderStatus, "default" | "secondary" | "destructi
 
 export default function AdminDashboard() {
   const firestore = useFirestore();
+  const router = useRouter();
 
   const productsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -139,7 +141,7 @@ export default function AdminDashboard() {
                     </TableHeader>
                     <TableBody>
                       {recentOrders.map(order => (
-                        <TableRow key={order.id}>
+                        <TableRow key={order.id} onClick={() => router.push(`/admin/orders/${order.id}`)} className="cursor-pointer">
                             <TableCell>
                                 <div className="font-medium">{order.shippingAddress.firstName} {order.shippingAddress.lastName}</div>
                                 <div className="flex items-center gap-2 mt-1">
