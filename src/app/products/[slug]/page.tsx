@@ -27,6 +27,7 @@ export default function ProductPage() {
   const product = products?.[0];
 
   const artistRef = useMemoFirebase(() => {
+    // Only create the ref if the product has been loaded
     if (!firestore || !product?.artistId) return null;
     return doc(firestore, 'artists', product.artistId);
   }, [firestore, product]);
@@ -53,6 +54,7 @@ export default function ProductPage() {
     );
   }
 
+  // After loading is complete, if there's still no product, then it's a 404
   if (!product) {
     notFound();
   }

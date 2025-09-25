@@ -53,6 +53,7 @@ export default function ArtistPage() {
     )
   }
 
+  // After loading is complete, if there's still no artist, then it's a 404
   if (!artist) {
     notFound();
   }
