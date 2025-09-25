@@ -3,10 +3,10 @@
 
 import React, { useState, useEffect, type ReactNode } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
-import { initializeFirebase } from '@/firebase';
-import type { FirebaseApp } from 'firebase/app';
-import type { Auth } from 'firebase/auth';
-import type { Firestore } from 'firebase/firestore';
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
+import { getAuth, type Auth } from 'firebase/auth';
+import { getFirestore, type Firestore } from 'firebase/firestore';
+import { firebaseConfig } from './config';
 
 interface FirebaseClientProviderProps {
   children: ReactNode;
@@ -24,14 +24,15 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
   useEffect(() => {
     // This effect runs only on the client, after the component has mounted.
     // This is the correct and safe place to initialize Firebase.
-    const services = initializeFirebase();
-    setFirebaseServices(services);
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const firestore = getFirestore(app);
+    setFirebaseServices({ firebaseApp: app, auth, firestore });
   }, []); // Empty dependency array ensures this runs only once
 
   if (!firebaseServices) {
     // Render a loading state or null while Firebase is initializing.
-    // This prevents children from trying to access Firebase before it's ready
-    // and is crucial for preventing server-side execution of this logic.
+    // This prevents children from trying to access Firebase before it's ready.
     return null;
   }
 

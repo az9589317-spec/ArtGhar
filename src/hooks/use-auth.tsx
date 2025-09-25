@@ -8,6 +8,7 @@ import {
   useContext,
   ReactNode,
   useCallback,
+  useMemo,
 } from "react"
 import {
   User,
@@ -45,7 +46,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Get auth and firestore from the central Firebase provider
   const { auth, firestore } = useFirebase();
 
 
