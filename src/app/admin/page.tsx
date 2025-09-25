@@ -10,7 +10,7 @@ import type { Order, Product } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Image from 'next/image';
 
 export default function AdminDashboard() {
   const firestore = useFirestore();
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
               <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Customer</TableHead>
+                        <TableHead>Customer & Products</TableHead>
                         <TableHead className="hidden sm:table-cell">Date</TableHead>
                         <TableHead className="hidden sm:table-cell">Status</TableHead>
                         <TableHead className="text-right">Total</TableHead>
@@ -127,7 +127,18 @@ export default function AdminDashboard() {
                     <TableRow key={order.id}>
                         <TableCell>
                             <div className="font-medium">{order.shippingAddress.firstName} {order.shippingAddress.lastName}</div>
-                            <div className="text-sm text-muted-foreground md:hidden">{format(order.createdAt.toDate(), "PP")}</div>
+                            <div className="flex items-center gap-2 mt-1">
+                                <div className="flex -space-x-2 overflow-hidden">
+                                {order.products.slice(0, 3).map(p => (
+                                    <div key={p.id} className="relative h-6 w-6 rounded-full overflow-hidden border-2 border-background ring-1 ring-muted">
+                                        <Image src={p.image} alt={p.name} fill className="object-cover"/>
+                                    </div>
+                                ))}
+                                </div>
+                                <div className="text-xs text-muted-foreground truncate">
+                                    {order.products.map(p => p.name).join(', ')}
+                                </div>
+                            </div>
                         </TableCell>
                          <TableCell className="hidden sm:table-cell">{format(order.createdAt.toDate(), "PP")}</TableCell>
                          <TableCell className="hidden sm:table-cell">{order.status}</TableCell>
