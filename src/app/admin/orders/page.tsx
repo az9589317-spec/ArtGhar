@@ -97,7 +97,7 @@ export default function AdminOrdersPage() {
                       <TableRow key={order.id}>
                         <TableCell className="font-medium">
                           <Link href={`/admin/orders/${order.id}`} className="text-primary hover:underline">
-                            {order.id.substring(0, 7).toUpperCase()}...
+                            #{order.id.substring(0, 7).toUpperCase()}
                           </Link>
                         </TableCell>
                         <TableCell>{order.shippingAddress.firstName} {order.shippingAddress.lastName}</TableCell>
