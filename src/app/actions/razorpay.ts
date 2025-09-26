@@ -1,20 +1,14 @@
+
 'use server';
 
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 
-// Hardcoding keys as a definitive fix for the environment variable issue.
-const keyId = "rzp_live_RM8zaIuw82fOWj";
 const keySecret = "wTWoIllZJzLmeGf5mChheVKW";
 
-if (!keyId || !keySecret) {
-  // This check is now redundant but kept for safety.
-  throw new Error('Razorpay API keys are not defined.');
-}
-
 const razorpay = new Razorpay({
-  key_id: keyId,
-  key_secret: keySecret,
+  key_id: "rzp_live_RM8zaIuw82fOWj",
+  key_secret: "wTWoIllZJzLmeGf5mChheVKW",
 });
 
 export async function createOrder(amount: number) {
@@ -45,7 +39,7 @@ export async function verifyPayment(params: VerifyPaymentParams) {
     const body = razorpay_order_id + "|" + razorpay_payment_id;
 
     const expectedSignature = crypto
-        .createHmac('sha256', keySecret!)
+        .createHmac('sha256', keySecret)
         .update(body.toString())
         .digest('hex');
 
