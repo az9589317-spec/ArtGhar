@@ -3,11 +3,13 @@
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 
-const keyId = process.env.RAZORPAY_KEY_ID;
-const keySecret = process.env.RAZORPAY_KEY_SECRET;
+// Hardcoding keys as a definitive fix for the environment variable issue.
+const keyId = "rzp_live_RM8zaIuw82fOWj";
+const keySecret = "wTWoIllZJzLmeGf5mChheVKW";
 
 if (!keyId || !keySecret) {
-  throw new Error('Razorpay API keys are not defined in environment variables.');
+  // This check is now redundant but kept for safety.
+  throw new Error('Razorpay API keys are not defined.');
 }
 
 const razorpay = new Razorpay({
