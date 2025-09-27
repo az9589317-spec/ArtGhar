@@ -67,8 +67,8 @@ export type Order = {
   total: number;
   paymentDetails?: {
     gateway: string;
-    orderId: string;
-    paymentId: string;
+    orderId?: string;
+    paymentId?: string;
   }
 };
 

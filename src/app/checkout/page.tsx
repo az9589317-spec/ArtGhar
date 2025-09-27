@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore } from '@/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -19,7 +20,8 @@ import type { Order, ShippingAddress } from '@/lib/types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { createOrder, verifyPayment } from '@/app/actions/razorpay';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 
 const shippingFormSchema = z.object({
@@ -30,7 +32,12 @@ const shippingFormSchema = z.object({
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
   zip: z.string().min(1, "ZIP code is required"),
+  paymentMethod: z.enum(['razorpay', 'cod'], {
+    required_error: "Please select a payment method.",
+  }),
 });
+
+const allowedCodZipCodes = ["786182", "786181", "786183"];
 
 declare global {
   interface Window {
@@ -56,149 +63,153 @@ export default function CheckoutPage() {
       address: "",
       city: "",
       zip: "",
+      paymentMethod: "razorpay",
     },
   });
   
+  const watchedZipCode = form.watch("zip");
+  const [isCodAvailable, setIsCodAvailable] = useState(false);
+
+  useEffect(() => {
+    const isAvailable = allowedCodZipCodes.includes(watchedZipCode);
+    setIsCodAvailable(isAvailable);
+    if (!isAvailable && form.getValues("paymentMethod") === "cod") {
+      form.setValue("paymentMethod", "razorpay");
+    }
+  }, [watchedZipCode, form]);
+
   const shippingCost = 40.00;
   const totalAmount = totalPrice + shippingCost;
 
-  // Redirect if cart is empty
   useEffect(() => {
     if (items.length === 0 && !isProcessing) {
       router.push('/');
     }
   }, [items.length, isProcessing, router]);
 
-
-  const handleSubmit = async (shippingDetails: ShippingAddress) => {
-    setIsProcessing(true);
+  const handlePlaceOrder = async (
+    shippingDetails: ShippingAddress,
+    paymentDetails: Order['paymentDetails'] = { gateway: 'COD' }
+  ) => {
     if (!user || !firestore) {
+      toast({ variant: "destructive", title: "Authentication Error", description: "You must be logged in to place an order." });
+      return;
+    }
+  
+    setIsProcessing(true);
+    const orderData: Omit<Order, 'id'> = {
+      userId: user.uid,
+      createdAt: serverTimestamp(),
+      status: "Pending",
+      products: items.map(item => ({
+        id: item.id,
+        name: item.name,
+        image: item.image,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+      shippingAddress: shippingDetails,
+      subtotal: totalPrice,
+      shippingCost,
+      total: totalAmount,
+      paymentDetails,
+    };
+  
+    try {
+      const docRef = await addDoc(collection(firestore, 'orders'), orderData);
+  
+      // Send notification email
+      try {
+        await fetch('/api/send-order-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: docRef.id, ...orderData }),
+        });
+      } catch (emailError) {
+        console.error("Failed to send order notification email:", emailError);
+      }
+  
       toast({
-        variant: "destructive",
-        title: "Authentication Error",
-        description: "You must be logged in to place an order.",
+        title: "Order Placed!",
+        description: "Thank you for your purchase. Your art is on its way!",
       });
+      clearCart();
+      router.push(`/my-orders/${docRef.id}`);
+    } catch (error) {
+      console.error("Error placing order:", error);
+      const contextualError = new FirestorePermissionError({
+        operation: 'create',
+        path: `orders/[new_id]`,
+        requestResourceData: orderData
+      });
+      errorEmitter.emit('permission-error', contextualError);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  
+  const handleRazorpayPayment = async (shippingDetails: ShippingAddress) => {
+    setIsProcessing(true);
+    const razorpayOrder = await createOrder(totalAmount * 100);
+    if (!razorpayOrder) {
+      toast({ variant: "destructive", title: "Payment Error", description: "Could not create a payment order. Please try again." });
       setIsProcessing(false);
       return;
     }
-    
-    // 1. Create Razorpay Order
-    const razorpayOrder = await createOrder(totalAmount * 100); // Amount in paise
-    if (!razorpayOrder) {
-        toast({
-            variant: "destructive",
-            title: "Payment Error",
-            description: "Could not create a payment order. Please try again.",
-        });
-        setIsProcessing(false);
-        return;
-    }
 
-    // 2. Open Razorpay Checkout
     const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: razorpayOrder.amount,
-        currency: razorpayOrder.currency,
-        name: 'ArtGhar',
-        description: 'Artisan Marketplace Purchase',
-        order_id: razorpayOrder.id,
-        handler: async (response: any) => {
-            // 3. Verify Payment
-            const verificationResult = await verifyPayment({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-            });
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
+      name: 'ArtGhar',
+      description: 'Artisan Marketplace Purchase',
+      order_id: razorpayOrder.id,
+      handler: async (response: any) => {
+        const verificationResult = await verifyPayment({
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+        });
 
-            if (!verificationResult.isValid) {
-                 toast({
-                    variant: "destructive",
-                    title: "Payment Failed",
-                    description: "Payment verification failed. Please contact support.",
-                });
-                setIsProcessing(false);
-                return;
-            }
-
-            // 4. Create Firestore Order
-            const orderData: Omit<Order, 'id'> = {
-                userId: user.uid,
-                createdAt: serverTimestamp(),
-                status: "Pending" as const,
-                products: items.map(item => ({
-                    id: item.id,
-                    name: item.name,
-                    image: item.image,
-                    quantity: item.quantity,
-                    price: item.price,
-                })),
-                shippingAddress: shippingDetails,
-                subtotal: totalPrice,
-                shippingCost,
-                total: totalAmount,
-                paymentDetails: {
-                    gateway: 'razorpay',
-                    orderId: response.razorpay_order_id,
-                    paymentId: response.razorpay_payment_id
-                }
-            };
-            
-            try {
-                const docRef = await addDoc(collection(firestore, 'orders'), orderData);
-                
-                // 5. Send notification email
-                try {
-                  await fetch('/api/send-order-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orderId: docRef.id, ...orderData }),
-                  });
-                } catch (emailError) {
-                  console.error("Failed to send order notification email:", emailError);
-                  // Don't block the user flow for this, just log it.
-                }
-
-                toast({
-                    title: "Order Placed!",
-                    description: "Thank you for your purchase. Your art is on its way!",
-                });
-                clearCart();
-                router.push(`/my-orders/${docRef.id}`);
-            } catch (error) {
-                 console.error("Error placing order:", error);
-                const contextualError = new FirestorePermissionError({
-                    operation: 'create',
-                    path: `orders/[new_id]`,
-                    requestResourceData: orderData
-                });
-                errorEmitter.emit('permission-error', contextualError);
-                // The global listener will show the toast
-            } finally {
-                setIsProcessing(false);
-            }
-        },
-        prefill: {
-            name: `${shippingDetails.firstName} ${shippingDetails.lastName}`,
-            email: shippingDetails.email,
-            contact: shippingDetails.phone,
-        },
-        theme: {
-            color: "#E07A5F"
-        },
-        modal: {
-            ondismiss: () => {
-                setIsProcessing(false);
-                toast({
-                    variant: "destructive",
-                    title: "Payment Cancelled",
-                    description: "You closed the payment window.",
-                });
-            }
+        if (!verificationResult.isValid) {
+          toast({ variant: "destructive", title: "Payment Failed", description: "Payment verification failed. Please contact support." });
+          setIsProcessing(false);
+          return;
         }
+
+        await handlePlaceOrder(shippingDetails, {
+          gateway: 'razorpay',
+          orderId: response.razorpay_order_id,
+          paymentId: response.razorpay_payment_id,
+        });
+      },
+      prefill: {
+        name: `${shippingDetails.firstName} ${shippingDetails.lastName}`,
+        email: shippingDetails.email,
+        contact: shippingDetails.phone,
+      },
+      theme: { color: "#E07A5F" },
+      modal: {
+        ondismiss: () => {
+          setIsProcessing(false);
+          toast({ variant: "destructive", title: "Payment Cancelled", description: "You closed the payment window." });
+        }
+      }
     };
 
     const rzp = new window.Razorpay(options);
     rzp.open();
+  };
+
+
+  const handleSubmit = async (values: z.infer<typeof shippingFormSchema>) => {
+    const { paymentMethod, ...shippingDetails } = values;
+
+    if (paymentMethod === 'cod') {
+      await handlePlaceOrder(shippingDetails);
+    } else {
+      await handleRazorpayPayment(shippingDetails);
+    }
   };
 
   if (items.length === 0) {
@@ -215,38 +226,84 @@ export default function CheckoutPage() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)}>
           <div className="grid lg:grid-cols-2 gap-12 items-start">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline text-2xl">Shipping Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="firstName" render={({ field }) => (
-                        <FormItem><FormLabel>First Name</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
+            <div className="space-y-6">
+                <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline text-2xl">Shipping Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="firstName" render={({ field }) => (
+                            <FormItem><FormLabel>First Name</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={form.control} name="lastName" render={({ field }) => (
+                            <FormItem><FormLabel>Last Name</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                    </div>
+                    <FormField control={form.control} name="email" render={({ field }) => (
+                        <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
                     )} />
-                    <FormField control={form.control} name="lastName" render={({ field }) => (
-                        <FormItem><FormLabel>Last Name</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
+                    <FormField control={form.control} name="phone" render={({ field }) => (
+                        <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
                     )} />
-                </div>
-                 <FormField control={form.control} name="email" render={({ field }) => (
-                    <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
-                )} />
-                 <FormField control={form.control} name="phone" render={({ field }) => (
-                    <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
-                )} />
-                 <FormField control={form.control} name="address" render={({ field }) => (
-                    <FormItem><FormLabel>Address</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
-                )} />
-                <div className="grid grid-cols-3 gap-4">
-                    <FormField control={form.control} name="city" render={({ field }) => (
-                        <FormItem className="col-span-2"><FormLabel>City</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
+                    <FormField control={form.control} name="address" render={({ field }) => (
+                        <FormItem><FormLabel>Address</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
                     )} />
-                    <FormField control={form.control} name="zip" render={({ field }) => (
-                        <FormItem><FormLabel>ZIP Code</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                </div>
-              </CardContent>
-            </Card>
+                    <div className="grid grid-cols-3 gap-4">
+                        <FormField control={form.control} name="city" render={({ field }) => (
+                            <FormItem className="col-span-2"><FormLabel>City</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={form.control} name="zip" render={({ field }) => (
+                            <FormItem><FormLabel>ZIP Code</FormLabel><FormControl><Input {...field} disabled={isProcessing} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                    </div>
+                </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline text-2xl">Payment Method</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                         <FormField
+                            control={form.control}
+                            name="paymentMethod"
+                            render={({ field }) => (
+                                <FormItem className="space-y-3">
+                                <FormControl>
+                                    <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex flex-col space-y-1"
+                                    disabled={isProcessing}
+                                    >
+                                    <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border p-4">
+                                        <FormControl>
+                                        <RadioGroupItem value="razorpay" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal w-full">
+                                            Pay with Razorpay (Credit/Debit Card, UPI)
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className={cn("flex items-center space-x-3 space-y-0 rounded-md border p-4", !isCodAvailable && "text-muted-foreground bg-muted/50")}>
+                                        <FormControl>
+                                        <RadioGroupItem value="cod" disabled={!isCodAvailable} />
+                                        </FormControl>
+                                        <div className="w-full">
+                                            <FormLabel className={cn("font-normal w-full", !isCodAvailable && "cursor-not-allowed")}>
+                                                Cash on Delivery
+                                            </FormLabel>
+                                            {!isCodAvailable && <p className="text-xs">Not available for your ZIP code.</p>}
+                                        </div>
+                                    </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                    </CardContent>
+                </Card>
+            </div>
 
             <div className="sticky top-24">
               <Card>
@@ -286,7 +343,7 @@ export default function CheckoutPage() {
               </Card>
               <Button type="submit" size="lg" className="w-full mt-6" disabled={isProcessing}>
                  {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Place Order
+                {form.getValues("paymentMethod") === 'cod' ? 'Place Order' : 'Proceed to Payment'}
               </Button>
             </div>
           </div>
