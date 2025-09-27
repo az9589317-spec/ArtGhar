@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingBag, Image as ImageIcon } from 'lucide-react';
 import type { Artist, Product } from '@/lib/types';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
@@ -55,7 +55,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
   
   return (
-    <Card className="group overflow-hidden rounded-lg shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white/30 border-none">
+    <Card className="group flex flex-col overflow-hidden rounded-lg shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white/30 border-none">
         <CardHeader className="p-0">
             <Link href={`/products/${product.slug}`} className="block relative">
                 <div className="aspect-square w-full relative">
@@ -71,16 +71,10 @@ export default function ProductCard({ product }: ProductCardProps) {
                             <ImageIcon className="h-16 w-16 text-muted-foreground" />
                         </div>
                     )}
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <Button variant="secondary" size="sm" onClick={handleAddToCart}>
-                            <ShoppingBag className="mr-2 h-4 w-4" />
-                            Add to Cart
-                        </Button>
-                    </div>
                 </div>
             </Link>
         </CardHeader>
-        <CardContent className="p-4">
+        <CardContent className="p-4 flex-grow">
             <Link href={`/products/${product.slug}`}>
                 <h3 className="text-lg font-headline font-semibold group-hover:text-primary transition-colors truncate">
                     {product.name}
@@ -97,6 +91,12 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <p className="text-lg font-bold text-foreground">₹{product.price.toFixed(2)}</p>
             </div>
         </CardContent>
+         <CardFooter className="p-4 pt-0">
+            <Button variant="outline" className="w-full" onClick={handleAddToCart}>
+                <ShoppingBag className="mr-2 h-4 w-4" />
+                Add to Cart
+            </Button>
+        </CardFooter>
     </Card>
   );
 }
