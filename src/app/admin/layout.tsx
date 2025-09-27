@@ -51,7 +51,7 @@ export default function AdminLayout({
                       asChild
                       isActive={pathname === "/admin"}
                       tooltip="Dashboard"
-                      size="sm"
+                      size="default"
                     >
                       <Link href="/admin">
                         <LayoutDashboard />
@@ -64,7 +64,7 @@ export default function AdminLayout({
                       asChild
                       isActive={pathname.startsWith("/admin/orders")}
                       tooltip="Orders"
-                      size="sm"
+                      size="default"
                     >
                       <Link href="/admin/orders">
                         <Package />
@@ -77,7 +77,7 @@ export default function AdminLayout({
                       asChild
                       isActive={pathname.startsWith("/admin/sales")}
                       tooltip="Sales"
-                      size="sm"
+                      size="default"
                     >
                       <Link href="/admin/sales">
                         <Receipt />
@@ -90,7 +90,7 @@ export default function AdminLayout({
                       asChild
                       isActive={pathname.startsWith("/admin/products")}
                       tooltip="Products"
-                      size="sm"
+                      size="default"
                     >
                       <Link href="/admin/products">
                         <ShoppingBag />
@@ -103,7 +103,7 @@ export default function AdminLayout({
                       asChild
                       isActive={pathname.startsWith("/admin/artists")}
                       tooltip="Artists"
-                      size="sm"
+                      size="default"
                     >
                       <Link href="/admin/artists">
                         <Users />
@@ -116,7 +116,7 @@ export default function AdminLayout({
                       asChild
                       isActive={pathname.startsWith("/admin/slider")}
                       tooltip="Homepage Slider"
-                      size="sm"
+                      size="default"
                     >
                       <Link href="/admin/slider">
                         <ImageIcon />
@@ -129,7 +129,7 @@ export default function AdminLayout({
                       asChild
                       isActive={pathname.startsWith("/admin/social")}
                       tooltip="Social Media"
-                      size="sm"
+                      size="default"
                     >
                       <Link href="/admin/social">
                         <Share2 />
@@ -142,7 +142,7 @@ export default function AdminLayout({
                       asChild
                       isActive={pathname.startsWith("/admin/data")}
                       tooltip="Data Management"
-                      size="sm"
+                      size="default"
                     >
                       <Link href="/admin/data">
                         <Database />
