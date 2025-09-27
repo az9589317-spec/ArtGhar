@@ -57,7 +57,7 @@ const artists: LocalArtist[] = [
 
 const categories: Category[] = [
     { id: '1', name: 'Pottery', slug: 'pottery' },
-    { id: '2', name: 'Painting', slug: 'painting' },
+    { id: '2', name: 'Oil Painting', slug: 'oil-painting' },
     { id: '3', name: 'Jewelry', slug: 'jewelry' },
     { id: '4', name: 'Textiles', slug: 'textiles' },
     { id: '5', name: 'Home Goods', slug: 'home-goods' },
@@ -67,6 +67,11 @@ const categories: Category[] = [
     { id: '9', name: 'Glass Art', slug: 'glass-art' },
     { id: '10', name: 'Woodworking', slug: 'woodworking' },
     { id: '11', name: 'Leathercraft', slug: 'leathercraft' },
+    { id: '13', name: 'Acrylic Painting', slug: 'acrylic-painting' },
+    { id: '14', name: 'Watercolor Painting', slug: 'watercolor-painting' },
+    { id: '15', name: 'Abstract Painting', slug: 'abstract-painting' },
+    { id: '16', name: 'Landscape Painting', slug: 'landscape-painting' },
+    { id: '17', name: 'Portrait Painting', slug: 'portrait-painting' },
     { id: '12', name: 'Others', slug: 'others' },
 ]
 
@@ -89,7 +94,7 @@ const products: LocalProduct[] = [
     price: 350.00,
     images: [{ id: 'product-2', url: PlaceHolderImages.find(p => p.id === 'product-2')?.imageUrl!, alt: 'An abstract oil painting with vibrant colors.', hint: 'abstract painting' }],
     artistId: '2',
-    category: 'Painting',
+    category: 'Abstract Painting',
   },
   {
     id: '3',
