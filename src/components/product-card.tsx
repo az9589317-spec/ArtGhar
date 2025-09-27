@@ -30,7 +30,8 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
   const { toast } = useToast();
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
     const imageUrl = product.imageUrls?.[0];
     if (imageUrl) {
         addItem({
@@ -54,9 +55,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
   
   return (
-    <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group">
+    <Link href={`/products/${product.slug}`} className="group block">
+    <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white/30">
       <CardHeader className="p-0 border-b">
-        <Link href={`/products/${product.slug}`} className="block">
           <div className="aspect-square relative overflow-hidden">
             {product.imageUrls && product.imageUrls.length > 0 ? (
                 <Image
@@ -71,25 +72,25 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </div>
             )}
           </div>
-        </Link>
       </CardHeader>
       <CardContent className="p-4 flex-grow">
-        <h3 className="text-lg font-headline font-semibold">
-          <Link href={`/products/${product.slug}`} className="hover:text-primary transition-colors">{product.name}</Link>
+        <h3 className="text-lg font-headline font-semibold group-hover:text-primary transition-colors">
+            {product.name}
         </h3>
         {artist && (
           <p className="text-sm text-muted-foreground">
-            by <Link href={`/artists/${artist.id}`} className="hover:underline">{artist.name}</Link>
+            by {artist.name}
           </p>
         )}
       </CardContent>
       <CardFooter className="p-4 pt-0 flex justify-between items-center">
         <p className="text-lg font-bold text-foreground">₹{product.price.toFixed(2)}</p>
-        <Button variant="outline" size="sm" onClick={handleAddToCart}>
+        <Button variant="outline" size="sm" onClick={handleAddToCart} className="opacity-0 group-hover:opacity-100 transition-opacity">
           <ShoppingBag className="mr-2 h-4 w-4" />
-          Add to cart
+          Add
         </Button>
       </CardFooter>
     </Card>
+    </Link>
   );
 }

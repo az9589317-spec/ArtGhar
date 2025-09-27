@@ -36,33 +36,35 @@ export default function ProductsPage() {
     : "All Creations";
 
   return (
-    <div className="container mx-auto px-4 py-12 md:py-20">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-headline font-bold">
-          {pageTitle}
-        </h1>
-        {searchQuery && (
-            <Button variant="link" onClick={() => router.push('/products')}>
-                Clear search and view all products
-            </Button>
-        )}
-      </div>
+    <div className="bg-brand-sand bg-dot-pattern">
+      <div className="container mx-auto px-4 py-12 md:py-20">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-headline font-bold">
+            {pageTitle}
+          </h1>
+          {searchQuery && (
+              <Button variant="link" onClick={() => router.push('/products')}>
+                  Clear search and view all products
+              </Button>
+          )}
+        </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {isLoading && Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="space-y-2">
-                <Skeleton className="h-64 w-full" />
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-6 w-1/2" />
-            </div>
-        ))}
-        {!isLoading && filteredProducts.length > 0 ? (
-          filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))
-        ) : (
-          !isLoading && <p className="col-span-full text-center text-muted-foreground">No products found matching your search.</p>
-        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {isLoading && Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                  <Skeleton className="h-64 w-full" />
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-6 w-1/2" />
+              </div>
+          ))}
+          {!isLoading && filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          ) : (
+            !isLoading && <p className="col-span-full text-center text-muted-foreground">No products found matching your search.</p>
+          )}
+        </div>
       </div>
     </div>
   );

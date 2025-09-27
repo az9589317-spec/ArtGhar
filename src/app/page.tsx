@@ -29,14 +29,14 @@ export default function Home() {
   const { data: products, isLoading } = useCollection<Product>(productsQuery);
 
   const plugin = React.useRef(
-    Autoplay({ delay: 2000, stopOnInteraction: true })
+    Autoplay({ delay: 4000, stopOnInteraction: true })
   )
 
   const heroProducts = products?.filter(p => p.imageUrls && p.imageUrls.length > 0).slice(0, 3) || [];
 
   return (
     <div className="flex flex-col">
-      <section className="w-full">
+      <section className="w-full bg-brand-stone">
         {isLoading && (
            <Skeleton className="w-full h-[60vh] md:h-[70vh]" />
         )}
@@ -83,7 +83,7 @@ export default function Home() {
         )}
       </section>
 
-      <section id="featured-products" className="py-12 md:py-20">
+      <section id="featured-products" className="py-12 md:py-20 bg-brand-stone bg-dot-pattern">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-headline font-bold text-center mb-10">
             Featured Products
