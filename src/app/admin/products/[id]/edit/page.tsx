@@ -303,50 +303,46 @@ export default function EditProductPage() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="imageUrls"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Product Images</FormLabel>
-                   <FormControl>
-                    <div>
-                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 mb-4">
-                            {fields.map((field, index) => (
-                                <div key={field.id} className="relative aspect-square">
-                                    {field.value && <Image src={field.value} alt={`Product image ${index + 1}`} fill className="object-cover rounded-md border" />}
-                                    <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={() => remove(index)}>
-                                        <X className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            ))}
-                             <label htmlFor="image-upload" className="cursor-pointer">
-                                <div className="relative flex justify-center items-center aspect-square w-full rounded-md border-2 border-dashed border-input bg-background hover:bg-accent text-muted-foreground">
-                                {isUploading ? (
-                                    <Loader2 className="h-8 w-8 animate-spin" />
-                                ) : (
-                                    <div className="text-center">
-                                    <UploadCloud className="mx-auto h-8 w-8" />
-                                    <p className="text-xs mt-1">Upload</p>
-                                    </div>
-                                )}
-                                </div>
-                              </label>
-                        </div>
-                      <Input
-                        id="image-upload"
-                        type="file"
-                        className="sr-only"
-                        onChange={handleImageUpload}
-                        accept="image/png, image/jpeg, image/gif"
-                        disabled={isUploading}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FormItem>
+              <FormLabel>Product Images</FormLabel>
+              <FormControl>
+                <div>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 mb-4">
+                    {fields.map((field, index) => (
+                      <div key={field.id} className="relative aspect-square">
+                        {field.value && <Image src={field.value} alt={`Product image ${index + 1}`} fill className="object-cover rounded-md border" />}
+                        <Button type="button" variant="destructive" size="icon" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={() => remove(index)}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <label htmlFor="image-upload" className="cursor-pointer">
+                      <div className="relative flex justify-center items-center aspect-square w-full rounded-md border-2 border-dashed border-input bg-background hover:bg-accent text-muted-foreground">
+                        {isUploading ? (
+                          <Loader2 className="h-8 w-8 animate-spin" />
+                        ) : (
+                          <div className="text-center">
+                            <UploadCloud className="mx-auto h-8 w-8" />
+                            <p className="text-xs mt-1">Upload</p>
+                          </div>
+                        )}
+                      </div>
+                    </label>
+                  </div>
+                  <Input
+                    id="image-upload"
+                    type="file"
+                    className="sr-only"
+                    onChange={handleImageUpload}
+                    accept="image/png, image/jpeg, image/gif"
+                    disabled={isUploading}
+                  />
+                </div>
+              </FormControl>
+               <FormMessage>
+                {form.formState.errors.imageUrls?.message}
+              </FormMessage>
+            </FormItem>
             
             <Button type="submit">Save Changes</Button>
           </form>
