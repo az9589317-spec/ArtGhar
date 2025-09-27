@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation"
 import React, { useState } from "react"
 import Image from "next/image"
 
+import { generateProductDescription } from "@/ai/flows/generate-product-description"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -27,12 +28,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { useCollection, useFirestore, useMemoFirebase, errorEmitter, FirestorePermissionError } from "@/firebase"
 import { collection, addDoc } from "firebase/firestore"
 import type { Artist, Category } from "@/lib/types"
-import { Loader2, UploadCloud, X } from "lucide-react"
+import { Loader2, UploadCloud, X, Sparkles } from "lucide-react"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -51,6 +52,7 @@ const formSchema = z.object({
     required_error: "Please select a category.",
   }),
   imageUrls: z.array(z.string().url()).min(1, { message: "Please upload at least one image." }),
+  keywords: z.string().optional(),
 });
 
 export default function AddProductPage() {
@@ -58,6 +60,7 @@ export default function AddProductPage() {
   const { toast } = useToast()
   const firestore = useFirestore()
   const [isUploading, setIsUploading] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
   
   const artistsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'artists') : null, [firestore]);
   const categoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
@@ -72,6 +75,7 @@ export default function AddProductPage() {
       description: "",
       price: 0,
       imageUrls: [],
+      keywords: "",
     },
   })
 
@@ -100,7 +104,7 @@ export default function AddProductPage() {
         append(result.image.url);
         toast({ title: "Image Uploaded", description: "Your image has been added." });
       } else {
-        throw new Error(result.error || "Unknown error occurred during upload.");
+        throw new Error(result.error?.message || "Unknown error occurred during upload.");
       }
     } catch (error: any) {
       console.error("Error uploading image:", error);
@@ -111,12 +115,47 @@ export default function AddProductPage() {
       });
     } finally {
       setIsUploading(false);
-      // Clear the file input
       if (event.target) {
         event.target.value = "";
       }
     }
   };
+
+  async function handleGenerateDescription() {
+    setIsGenerating(true);
+    const { name, categoryId, keywords } = form.getValues();
+    const categoryName = categories?.find(c => c.id === categoryId)?.name || "";
+
+    if (!name || !categoryId) {
+        toast({
+            variant: "destructive",
+            title: "Missing Information",
+            description: "Please fill out the product name and category to generate a description.",
+        });
+        setIsGenerating(false);
+        return;
+    }
+    try {
+        const result = await generateProductDescription({
+            productName: name,
+            categoryName,
+            keywords,
+        });
+        if (result.description) {
+            form.setValue("description", result.description, { shouldValidate: true });
+            toast({ title: "Success!", description: "A new description has been generated." });
+        }
+    } catch (error) {
+        console.error("Error generating description:", error);
+        toast({
+            variant: "destructive",
+            title: "AI Error",
+            description: "There was a problem generating the description. Please try again.",
+        });
+    } finally {
+        setIsGenerating(false);
+    }
+  }
 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -126,8 +165,9 @@ export default function AddProductPage() {
     }
     
     const slug = values.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+    const { keywords, ...productValues } = values;
     const productsCollection = collection(firestore, 'products');
-    const productData = { ...values, slug };
+    const productData = { ...productValues, slug };
 
     addDoc(productsCollection, productData).catch(error => {
         const contextualError = new FirestorePermissionError({
@@ -161,22 +201,6 @@ export default function AddProductPage() {
                   <FormLabel>Product Name</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., Handcrafted Ceramic Mug" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe the product in detail..."
-                      {...field}
-                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -240,6 +264,53 @@ export default function AddProductPage() {
                   <FormDescription>
                     Assign this product to an artist.
                   </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+             <Card className="border-dashed">
+                <CardHeader>
+                    <CardTitle className="text-lg">AI Description Generator</CardTitle>
+                    <CardDescription>Provide some keywords and let AI write the product description.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <FormField
+                    control={form.control}
+                    name="keywords"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Keywords</FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g., rustic, morning coffee, unique gift" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                            Comma-separated keywords that describe the product.
+                        </FormDescription>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                     <Button type="button" variant="outline" onClick={handleGenerateDescription} disabled={isGenerating}>
+                        {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                        Generate Description
+                    </Button>
+                </CardContent>
+             </Card>
+
+             <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Describe the product in detail..."
+                      {...field}
+                      rows={5}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
