@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingBag, Image as ImageIcon } from 'lucide-react';
 import type { Artist, Product } from '@/lib/types';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
@@ -55,42 +55,48 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
   
   return (
-    <Link href={`/products/${product.slug}`} className="group block">
-    <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white/30">
-      <CardHeader className="p-0 border-b">
-          <div className="aspect-square relative overflow-hidden">
-            {product.imageUrls && product.imageUrls.length > 0 ? (
-                <Image
-                    src={product.imageUrls[0]}
-                    alt={product.name}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-            ) : (
-                <div className="flex h-full w-full items-center justify-center bg-muted">
-                    <ImageIcon className="h-16 w-16 text-muted-foreground" />
+    <Card className="group overflow-hidden rounded-lg shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white/30 border-none">
+        <CardHeader className="p-0">
+            <Link href={`/products/${product.slug}`} className="block relative">
+                <div className="aspect-square w-full relative">
+                    {product.imageUrls && product.imageUrls.length > 0 ? (
+                        <Image
+                            src={product.imageUrls[0]}
+                            alt={product.name}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-muted">
+                            <ImageIcon className="h-16 w-16 text-muted-foreground" />
+                        </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <Button variant="secondary" size="sm" onClick={handleAddToCart}>
+                            <ShoppingBag className="mr-2 h-4 w-4" />
+                            Add to Cart
+                        </Button>
+                    </div>
                 </div>
-            )}
-          </div>
-      </CardHeader>
-      <CardContent className="p-4 flex-grow">
-        <h3 className="text-lg font-headline font-semibold group-hover:text-primary transition-colors">
-            {product.name}
-        </h3>
-        {artist && (
-          <p className="text-sm text-muted-foreground">
-            by {artist.name}
-          </p>
-        )}
-      </CardContent>
-      <CardFooter className="p-4 pt-0 flex justify-between items-center">
-        <p className="text-lg font-bold text-foreground">₹{product.price.toFixed(2)}</p>
-        <Button variant="outline" size="sm" onClick={handleAddToCart} className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <ShoppingBag className="mr-2 h-4 w-4" />
-          Add
-        </Button>
-      </CardFooter>
+            </Link>
+        </CardHeader>
+        <CardContent className="p-4">
+            <Link href={`/products/${product.slug}`}>
+                <h3 className="text-lg font-headline font-semibold group-hover:text-primary transition-colors truncate">
+                    {product.name}
+                </h3>
+            </Link>
+            <div className="flex justify-between items-baseline">
+                {artist ? (
+                <Link href={`/artists/${artist.id}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    by {artist.name}
+                </Link>
+                ) : (
+                    <div className="h-5 w-24 bg-muted animate-pulse rounded-md" />
+                )}
+                <p className="text-lg font-bold text-foreground">₹{product.price.toFixed(2)}</p>
+            </div>
+        </CardContent>
     </Card>
-    </Link>
   );
 }
