@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import CartSheet from './cart-sheet';
 import { useCart } from '@/hooks/use-cart';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth, useUser } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from './ui/scroll-area';
+import { useRouter } from 'next/navigation';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -33,12 +34,23 @@ export default function Header() {
   const [isClient, setIsClient] = useState(false);
   const { user, loading, userProfile } = useUser();
   const { signOut } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
+
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   const isAdmin = userProfile?.role === 'admin';
+
+  const handleSearchSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm">
@@ -64,10 +76,16 @@ export default function Header() {
             )}
         </nav>
         <div className="flex items-center gap-2">
-          <div className="relative hidden sm:block">
+          <form onSubmit={handleSearchSubmit} className="relative hidden sm:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input type="search" placeholder="Search products..." className="pl-9" />
-          </div>
+            <Input 
+              type="search" 
+              placeholder="Search products..." 
+              className="pl-9"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </form>
           <Button variant="ghost" size="icon" className="relative" onClick={() => setIsCartOpen(true)}>
             <ShoppingBag className="h-6 w-6" />
             {isClient && totalItems > 0 && (
