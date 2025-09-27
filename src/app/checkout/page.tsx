@@ -276,24 +276,24 @@ export default function CheckoutPage() {
                                     className="flex flex-col space-y-1"
                                     disabled={isProcessing}
                                     >
-                                    <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border p-4">
+                                    <FormItem>
+                                      <FormLabel className="flex items-center space-x-3 space-y-0 rounded-md border p-4 font-normal cursor-pointer">
                                         <FormControl>
-                                        <RadioGroupItem value="razorpay" />
+                                          <RadioGroupItem value="razorpay" />
                                         </FormControl>
-                                        <FormLabel className="font-normal w-full">
-                                            Pay with Razorpay (Credit/Debit Card, UPI)
-                                        </FormLabel>
+                                        <span>Pay with Razorpay (Credit/Debit Card, UPI)</span>
+                                      </FormLabel>
                                     </FormItem>
-                                    <FormItem className={cn("flex items-center space-x-3 space-y-0 rounded-md border p-4", !isCodAvailable && "text-muted-foreground bg-muted/50")}>
+                                     <FormItem className={cn(!isCodAvailable && "text-muted-foreground bg-muted/50 rounded-md border")}>
+                                      <FormLabel className={cn("flex items-center space-x-3 space-y-0 p-4 font-normal", isCodAvailable ? "cursor-pointer" : "cursor-not-allowed")}>
                                         <FormControl>
-                                        <RadioGroupItem value="cod" disabled={!isCodAvailable} />
+                                          <RadioGroupItem value="cod" disabled={!isCodAvailable} />
                                         </FormControl>
                                         <div className="w-full">
-                                            <FormLabel className={cn("font-normal w-full", !isCodAvailable && "cursor-not-allowed")}>
-                                                Cash on Delivery
-                                            </FormLabel>
-                                            {!isCodAvailable && <p className="text-xs">Not available for your ZIP code.</p>}
+                                          <span>Cash on Delivery</span>
+                                          {!isCodAvailable && <p className="text-xs">Not available for your ZIP code.</p>}
                                         </div>
+                                      </FormLabel>
                                     </FormItem>
                                     </RadioGroup>
                                 </FormControl>
@@ -352,3 +352,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+    
